@@ -46,11 +46,11 @@ const uriParams = {
 };
 
 const methodUris = {
-    checkContacts: `${baseUris.xpc}/checkContacts`,
-    checkMessages: `${baseUris.xpc}/checkMessages`,
+    checkContacts: `${baseUris.xpcBase}/checkContacts`,
+    checkMessages: `${baseUris.xpcBase}/checkMessages`,
     getBillingCredit: `${baseUris.base}/settings/billingcredit/`,
     getBox: `${baseUris.base}/inbox/recent`,
-    getContacts: `${baseUris.xpc}/getContacts`,
+    getContacts: `${baseUris.xpcBase}/getContacts`,
     getDoNotDisturb: `${baseUris.base}/settings/getDoNotDisturb/`,
     getPhoneInfo: `${baseUris.b0Base}/settings/tab/phones`,
     login: `${baseUris.accountsBase}/signin/challenge/sl/password`,
