@@ -4,6 +4,7 @@
   "description": "Unofficial Google Voice API developed for SynerGV application",
   "main": "dist/index.js",
   "scripts": {
+    "install": "babel src --out-dir dist",
     "build": "babel src --out-dir dist"
   },
   "repository": {

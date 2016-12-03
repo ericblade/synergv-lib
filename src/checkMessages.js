@@ -10,6 +10,9 @@ const methodUris = require('./uris').methodUris;
 // WORKING!
 // {"ok":true,"data":{"unreadCounts":{"all":3,"inbox":3,"missed":1,"placed":0,"received":0,"recorded":0,"sms":1,"spam":0,"starred":0,"trash":0,"unread":3,"voicemail":1}}}
 
+// also discovered you don't need to go through all the /xpc/ token stuff to get this, you can just
+// call $baseurl/checkMessages .. heh
+
 const checkMessages = (tokens, callback) => {
     getRequest(
         `${methodUris.checkMessages}?r=${encodeURIComponent(tokens.r)}`,

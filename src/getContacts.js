@@ -9,6 +9,7 @@ const methodUris = require('./uris').methodUris;
 // then the checkContacts, checkMessages, getContacts functions need to have their
 // encodeURIComponent calls removed, since that should be handled automatically in getRequest
 
+// might be same as $baseurl/phonebook/getall
 const getContacts = (tokens, callback) => {
     getRequest(
         `${methodUris.getContacts}?r=${encodeURIComponent(tokens.r)}`,
