@@ -1,0 +1,33 @@
+{
+  "name": "synergv-lib",
+  "version": "0.0.1",
+  "description": "Unofficial Google Voice API developed for SynerGV application",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "babel src --out-dir dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ericblade/synergv-lib.git"
+  },
+  "author": "Eric Blade <blade.eric@gmail.com>",
+  "contributors": [
+    {}
+  ],
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/ericblade/synergv-lib/issues"
+  },
+  "homepage": "https://github.com/ericblade/synergv-lib#readme",
+  "keywords": [
+    "google",
+    "voice",
+    "google voice",
+    "synergv"
+  ],
+  "devDependencies": {
+    "babel-cli": "^6.18.0",
+    "babel-plugin-transform-object-rest-spread": "^6.19.0",
+    "babel-preset-es2015": "^6.18.0"
+  }
+}
