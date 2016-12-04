@@ -5,10 +5,7 @@ To use:
 
 This is currently browser-only code
 
-copy this thing to your node_modules directory, then
-
-cd node_modules/synergv-lib
-npm run build
+npm install --save ericblade/synergv-lib
 
 then you can import it as an ES6 module.  You can probably require it as a node module as well,
 but the code won't currently work in node.  (I hope to figure that out in the future)
@@ -23,3 +20,5 @@ might decide they are a super priority. :-)
 // build command automatically?  These are things that I do not know the answer to, and I will
 // need to either research, or rely on those with more experience using ES6 source in places where
 // it doesn't normally belong. :-)
+
+/// I also have no idea how to format .md files.
