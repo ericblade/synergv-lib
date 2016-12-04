@@ -4,7 +4,7 @@ const postRequest = require('./postRequest');
 const methodUris = require('./uris').methodUris;
 
 const callCancel = (tokens, callback) => {
-    // TODO: Anyone know how to use any of the parameters here?
+    // gc.constants.CancelCallTypes = {CLICK_TO_CALL:"C2C", RECORDING:"RECORDING", VERIFY_FORWARDING:"VERIFY_FORWARDING"};
     const params = {
         outgoingNumber: '',
         forwardingNumber: '',
