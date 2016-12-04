@@ -46,15 +46,36 @@ const uriParams = {
 };
 
 const methodUris = {
+    archiveMessages: `${baseUris.base}/inbox/archiveMessages`,
+    blockMessage: `${baseUris.base}/inbox/block`,
+    callCancel: `${baseUris.base}/call/cancel`,
+    callNumber: `${baseUris.base}/call/connect`,
     checkContacts: `${baseUris.xpcBase}/checkContacts`,
     checkMessages: `${baseUris.xpcBase}/checkMessages`,
+    contactQuickAdd: `${baseUris.base}/phonebook/quickAdd`,
+    deleteForeverMessage: `${baseUris.base}/deleteForeverMessages`,
+    deleteMessage: `${baseUris.base}/deleteMessages`,
+    deleteNote: `${baseUris.base}/deletenote`,
+    donate: `${baseUris.base}/donate`,
+    editDefaultForwarding: `${baseUris.base}/settings/editDefaultForwarding`,
+    forward: `${baseUris.base}/inbox/reply/`,
+    generalSettings: `${baseUris.base}/settings/editGeneralSettings/`,
     getBillingCredit: `${baseUris.base}/settings/billingcredit/`,
     getBox: `${baseUris.base}/inbox/recent`,
     getContacts: `${baseUris.xpcBase}/getContacts`,
     getDoNotDisturb: `${baseUris.base}/settings/getDoNotDisturb/`,
     getPhoneInfo: `${baseUris.b0Base}/settings/tab/phones`,
+    getTranscriptTiming: `${baseUris.base}/media/transcriptWords`,
     login: `${baseUris.accountsBase}/signin/challenge/sl/password`,
-    sendMessage: `${baseUris.base}/sms/send/`, // note: i think this *requires* the / at the end
+    markRead: `${baseUris.base}/mark`,
+    restoreTranscript: `${baseUris.base}/restoreTranscript`,
+    saveNote: `${baseUris.base}/savenote`,
+    saveTranscript: `${baseUris.base}/saveTranscript`,
+    searchMessages: `${baseUris.base}/inbox/search`,
+    sendMessage: `${baseUris.base}/sms/send`,
+    settings: `${baseUris.base}/settings/tab/settings`,
+    starMessage: `${baseUris.base}/star`,
+    vmDownload: `${baseUris.base}/media/send_voicemail`,
 };
 
 module.exports = {
