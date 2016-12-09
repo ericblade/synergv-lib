@@ -8,19 +8,75 @@
 // currently works, so removing the encodeURIComponent needs to be tested, though I am assured
 // that that may work correctly... ?
 
-// TODO: we shouldn't even bother with doing the conversion to FormData, and just convert to
-// a string that is useful .. for some reason, which I do not remember, I used FormData, and I'm
-// pretty sure that it's because at least one request wanted to use multi-part instead of
-// x-www-form-urlencoded.
+// const assert = require('assert');
 
-// TODO: There's a bunch of code in here that was intended to attempt to change the implementation
-// to allow for Node.js use instead of Browser use. That needs to be re-worked completely, or
-// thrown out.  On the bright side, if using FormData() is not a requirement, then we can probably
-// use     "node-xmlhttprequest": "git+https://git@github.com/jrwells/node-XMLHttpRequest.git"
-// to handle the fact that Node doesn't normally have a XMLHttpRequest object.
+// shims for node.
+const entries = require('object.entries');
+const values = require('object.values');
 
-const XMLHR = window.XMLHttpRequest; // in Node, this should point to require()'d XMLHttpRequest
-const MyFormData = FormData; // in Node, this was pointing to require()'d FormData
+// const obj = { a: 1, b: 2, c: 3 };
+// const expected = [['a', 1], ['b', 2], ['c', 3]];
+
+// if (typeof Symbol === 'function' && typeof Symbol() === 'symbol') {
+//     // for environments with Symbol support
+//     const sym = Symbol();
+//     obj[sym] = 4;
+//     obj.d = sym;
+//     expected.push(['d', sym]);
+// }
+
+// assert.deepEqual(entries(obj), expected);
+
+if (!Object.entries) {
+    entries.shim();
+}
+
+if (!Object.values) {
+    values.shim();
+}
+
+// assert.deepEqual(Object.entries(obj), expected);
+
+// if browser, use built-in XMLHttpRequest, if not require it in.
+// if not browser, we are assuming that there is no getElementsByName in xmldoc module, used by
+// the fork of node-xmlhttprequest we are using. So shim that in as well.
+
+let XMLHR;
+let getElementsByName;
+
+if (typeof window !== 'undefined') {
+    XMLHR = window.XMLHttpRequest;
+} else {
+    XMLHR = require('node-xmlhttprequest').XMLHttpRequest;
+    getElementsByName = function (arg) {
+        console.warn('**** getElementsByName', arg);
+        const returnList = [];
+        const buildReturn = (startPoint) => {
+            Object.values(startPoint).forEach((child) => {
+                if (child.nodeType === 1) {
+                    if (child.getAttribute('name') === arg) {
+                        console.warn('**** get ElementsByName found', arg, child);
+                        returnList.push(child);
+                    }
+                    if (child.childNodes.length) {
+                        buildReturn(child.childNodes);
+                    }
+                }
+            });
+            // for (const child in startPoint) {
+            //     if (startPoint[child].nodeType != 1) {
+            //         continue;
+            //     }
+            //     if (startPoint[child].getAttribute('name') == arg) returnList.push(startPoint[child]);
+            //     if (startPoint[child].childNodes.length) {
+            //         buildReturn(startPoint[child].childNodes);
+            //     }
+            // }
+        };
+        buildReturn(this.childNodes);
+        return returnList;
+    };
+}
 
 const urlEncodeFormData = (fd) => {
     let s = '';
@@ -28,17 +84,15 @@ const urlEncodeFormData = (fd) => {
     const encode = str => encodeURIComponent(str).replace(/%20%/g, '+');
 
     for (const pair of fd.entries()) {
-        if (typeof pair[1] == 'string') {
-            console.warn(`**** encoding ${pair[0]}`);
-            s += `${s ? '&' : ''}${encode(pair[0])}=${encode(pair[1])}`;
+        const p = pair[1];
+        if (typeof p[1] === 'string') {
+            s += `${s ? '&' : ''}${encode(p[0])}=${encode(p[1])}`;
         }
     }
     return s;
 };
 
 const postRequest = (uri, { params = {}, options = {} } = {}, callback = null) => {
-    console.warn(`**** postRequest params=`, params);
-
     if (!options.tokens) {
         if (callback != null) {
             callback(new Error('*** Tokens must be supplied to options for post requests'));
@@ -50,12 +104,10 @@ const postRequest = (uri, { params = {}, options = {} } = {}, callback = null) =
         postData._rnr_se = options.tokens.rnr;
     }
 
-    console.warn('*** creating formdata');
-    const formData = new MyFormData();
+    const formData = [];
 
     Object.entries(postData).forEach((p) => {
-        console.warn('*** ', p[0], p[1]);
-        formData.append(p[0], p[1]);
+        formData.push([p[0], p[1]]);
     });
 
     const xhr = new XMLHR();
@@ -77,7 +129,6 @@ const postRequest = (uri, { params = {}, options = {} } = {}, callback = null) =
 
     if (callback != null) {
         xhr.onload = (...args/* err */) => {
-            console.warn('*** onLoad arugments', args);
             // console.warn('*** received postRequest response', xhr);
             switch (xhr.responseType) {
                 case 'document':
@@ -95,14 +146,8 @@ const postRequest = (uri, { params = {}, options = {} } = {}, callback = null) =
             }
         };
     }
-    // eslint-disable-next-line no-underscore-dangle
-    if (formData._streams) {
-        // xhr.send(formData._streams.join(null));
-        formData.submit(uri, xhr.onload);
-    } else {
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        xhr.send(urlEncodeFormData(formData));
-    }
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.send(urlEncodeFormData(formData));
 };
 
 module.exports = postRequest;
