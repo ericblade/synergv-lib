@@ -32,11 +32,14 @@ if (!Object.prototype.entries) {
 // use window XMLHttpRequest or require one if it's not there, see comments in postRequest also
 let XMLHR;
 let getElementsByName;
+let request;
+let DOMParser;
 
 if (typeof window !== 'undefined') {
     XMLHR = window.XMLHttpRequest;
 } else {
-    XMLHR = require('xmlhttprequest-cookie').XMLHttpRequest;
+    request = require('request').defaults({ jar: true });
+    DOMParser = require('xmldom').DOMParser;
     getElementsByName = function (arg) {
         const returnList = [];
         const buildReturn = (startPoint) => {
@@ -70,7 +73,8 @@ if (typeof window !== 'undefined') {
 //     responseType: one of 'json', 'document', or 'response' / '' .. returns a json object, a document object, or just whatever the native response is.
 // }
 
-const getRequest = (uri, { params = {}, options = {} } = {}, callback = null) => {
+const getRequest = XMLHR ? // Browser getRequest
+(uri, { params = {}, options = {} } = {}, callback = null) => {
     const xhr = new XMLHR();
     const paramsArr = [];
     let paramStr = '';
@@ -117,6 +121,29 @@ const getRequest = (uri, { params = {}, options = {} } = {}, callback = null) =>
         };
     }
     xhr.send(`${uri}${paramStr}`);
+}
+: // Node getRequest
+(url, { params = {}, options = {} } = {}, callback = null) => {
+    console.warn('*** node specific getRequest');
+    request.get({ url, qs: params }, (error, response, body) => {
+        switch (options.responseType) {
+            case 'json':
+                callback(JSON.parse(body));
+                console.warn('*** get body returned as json');
+                break;
+            case 'document':
+                const doc = new DOMParser().parseFromString(body);
+                doc.getElementsByName = getElementsByName.bind(doc);
+                callback(doc);
+                console.warn('*** get body returned as doc');
+                break;
+            case '': // fallthrough
+            default:
+                callback(body);
+                console.warn('*** get body returned as text');
+                break;
+        }
+    });
 };
 
 module.exports = getRequest;

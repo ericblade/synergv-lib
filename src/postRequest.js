@@ -47,11 +47,14 @@ if (!Object.prototype.entries) {
 
 let XMLHR;
 let getElementsByName;
+let request;
+let DOMParser;
 
 if (typeof window !== 'undefined') {
     XMLHR = window.XMLHttpRequest;
 } else {
-    XMLHR = require('xmlhttprequest-cookie').XMLHttpRequest;
+    request = require('request').defaults({ jar: true });
+    DOMParser = require('xmldom').DOMParser;
     getElementsByName = function (arg) {
         console.warn('**** getElementsByName', arg);
         const returnList = [];
@@ -67,15 +70,6 @@ if (typeof window !== 'undefined') {
                     }
                 }
             });
-            // for (const child in startPoint) {
-            //     if (startPoint[child].nodeType != 1) {
-            //         continue;
-            //     }
-            //     if (startPoint[child].getAttribute('name') == arg) returnList.push(startPoint[child]);
-            //     if (startPoint[child].childNodes.length) {
-            //         buildReturn(startPoint[child].childNodes);
-            //     }
-            // }
         };
         buildReturn(this.childNodes);
         return returnList;
@@ -96,7 +90,8 @@ const urlEncodeFormData = (fd) => {
     return s;
 };
 
-const postRequest = (uri, { params = {}, options = {} } = {}, callback = null) => {
+const postRequest = XMLHR ? // Browser version of postRequest function
+(uri, { params = {}, options = {} } = {}, callback = null) => {
     if (!options.tokens) {
         if (callback != null) {
             callback(new Error('*** Tokens must be supplied to options for post requests'));
@@ -152,6 +147,43 @@ const postRequest = (uri, { params = {}, options = {} } = {}, callback = null) =
     }
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.send(urlEncodeFormData(formData));
+}
+: // Node version of postRequest function.
+(url, { params = {}, options = {} } = {}, callback = null) => {
+    console.warn('**** node specific postRequest');
+    const postData = params;
+    if (options.tokens) {
+        if (options.tokens.rnr) {
+            postData._rnr_se = options.tokens.rnr;
+        }
+        if (options.tokens.GALX) {
+            postData.GALX = options.tokens.GALX;
+        }
+        if (options.tokens.gxf) {
+            postData.gxf = options.tokens.gxf;
+        }
+    }
+    request.post({ url, form: postData }, (error, response, body) => {
+        console.warn('***', response.request.uri);
+        switch (options.responseType) {
+            case 'json':
+                callback(JSON.parse(body));
+                console.warn('**** posted data back as json');
+                break;
+            case 'document':
+                const doc = new DOMParser().parseFromString(body);
+                doc.getElementsByName = getElementsByName.bind(doc);
+                callback(doc);
+                console.warn('**** posted data back as document');
+                break;
+            case '': // fallthrough
+            default:
+                callback(body);
+                console.warn('**** posting data back without parsing...');
+                break;
+        }
+    });
 };
+
 
 module.exports = postRequest;

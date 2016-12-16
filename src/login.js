@@ -56,7 +56,39 @@ const getGALX = (callback) => {
 // 10/29/16: TESTED, WORKS.
 // TODO: need to deal with a whole lot of possible error conditions i'm sure.
 
-const gvLogin = ({ username, password, tokens }, callback) => {
+const getGcDataFromDoc = (doc) => {
+    const x = doc.getElementsByTagName('script');
+    if (!x || x.length === 0) {
+        console.warn('**** debug', doc);
+        throw new Error('No script element found in login request');
+    }
+    let element = x[x.length - 1];
+    if (!element.innerText) {
+        //console.warn('**** debug', element.childNodes[0]);
+        element.innerText = element.childNodes[0].data;
+    }
+    const html = element.innerText.trim();
+    const i = html.indexOf('var _gcData = {');
+    const j = html.indexOf('};', i) + 2;
+    let tmp = html.substring(i, j);
+    tmp = tmp.replace('\"', '"');
+    let gcData = '';
+    try {
+        // eslint-disable-next-line
+        gcData = eval(`(function() {${tmp}; return _gcData; })();`);
+    } catch (err) {
+        console.error('**** ERROR EVALING GCDATA!', err);
+        console.error('**** attempted eval: ', tmp);
+        // console.error('**** document is', doc);
+        console.error('start index was', i);
+        console.error('end index was', j);
+        return null;
+    }
+    return gcData;
+};
+
+const gvLogin = typeof window !== 'undefined' ? // Browser login function
+({ username, password, tokens }, callback) => {
     const loginParams = {
         Email: username,
         Passwd: password,
@@ -72,33 +104,9 @@ const gvLogin = ({ username, password, tokens }, callback) => {
                 tokens,
             },
         },
-        (doc, xhr) => {
+        (doc /* , xhr*/) => {
             // console.warn('*** expecting doc with gcData', doc);
-            const x = doc.getElementsByTagName('script');
-            if (!x || x.length === 0) {
-                console.warn('**** debug', doc);
-                throw new Error('No script element found in login request');
-            }
-            const element = x[x.length - 1];
-            if (!element.innerText) {
-                console.warn('**** debug', xhr.responseText);
-                throw new Error('Element does not have innerText?!');
-            }
-            const html = x[x.length - 1].innerText.trim();
-            const i = html.indexOf('var _gcData = {');
-            const j = html.indexOf('};', i) + 2;
-            const tmp = html.substring(i, j);
-            let gcData = '';
-            try {
-                // eslint-disable-next-line
-                gcData = eval(`(function() {${tmp}; return _gcData; })();`);
-            } catch (err) {
-                console.error('**** ERROR EVALING GCDATA!', err);
-                console.error('**** attempted eval: ', tmp);
-                console.error('**** document is', doc);
-                callback({ tokens: null, gcData: null, err: -1 });
-                return;
-            }
+            const gcData = getGcDataFromDoc(doc);
             const newTokens = {
                 ...tokens,
                 rnr: gcData._rnr_se,
@@ -131,6 +139,37 @@ const gvLogin = ({ username, password, tokens }, callback) => {
                 }
             );
         });
+}
+: // Node login function
+({ username, password, tokens }, callback) => {
+    const loginParams = {
+        Email: username,
+        Passwd: password,
+        ...uriParams.mobileLogin,
+        ...tokens,
+    };
+
+    postRequest(methodUris.login, { params: loginParams, options: { responseType: 'document', tokens } }, (doc) => {
+        const params = {
+            checkedDomains: 'youtube',
+            pstMsg: 0,
+            chtml: 'LoginDoneHtml',
+            service: 'grandcentral',
+            continue: 'https://www.google.com/voice/',
+            gidl: 'EgIIAA',
+        };
+        const checkCookieUri = 'https://accounts.google.com/CheckCookie';
+
+        getRequest(checkCookieUri, { params, options: { responseType: 'document', tokens } }, (ccDoc) => {
+            //console.warn('***** SEARCHING FOR GCDATA IN', ccDoc);
+            const gcData = getGcDataFromDoc(ccDoc);
+            const newTokens = {
+                ...tokens,
+                rnr: gcData._rnr_se,
+            };
+            callback(newTokens);
+        });
+    });
 };
 
 // TESTED 10/29/16

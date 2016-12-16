@@ -85,6 +85,13 @@ module.exports = {
     methodUris,
 };
 
+// new discovery:
+// https://accounts.google.com/accountLoginInfoXhr
+// post to it, and receive some cryptic information about your account in JSON format:
+//
+// photo_url, name, email, shadow_email, encoded_profile_information, recovery_url, should_redirect_in_browser_drivefs, and action
+//
+
 // additional possible endpoints
 /*
     VOICEMAIL:"/media/send_voicemail/",
