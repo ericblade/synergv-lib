@@ -30,8 +30,9 @@
     "babel-cli": "^6.18.0",
     "babel-plugin-transform-object-rest-spread": "^6.19.0",
     "babel-preset-es2015": "^6.18.0",
-    "node-xmlhttprequest": "git+https://git@github.com/jrwells/node-XMLHttpRequest.git",
+    "node-xmlhttprequest": "git+https://git@github.com/ericblade/node-XMLHttpRequest.git",
     "object.entries": "^1.0.4",
-    "object.values": "^1.0.4"
+    "object.values": "^1.0.4",
+    "xmlhttprequest-cookie": "git+https://git@github.com/ericblade/node-xmlhttprequrest-cookie.git"
   }
 }
