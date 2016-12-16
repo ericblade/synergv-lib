@@ -59,30 +59,44 @@ const getGALX = (callback) => {
 const getGcDataFromDoc = (doc) => {
     const x = doc.getElementsByTagName('script');
     if (!x || x.length === 0) {
-        console.warn('**** debug', doc);
         throw new Error('No script element found in login request');
     }
     let element = x[x.length - 1];
-    if (!element.innerText) {
-        //console.warn('**** debug', element.childNodes[0]);
+    if (!element.innerText) { // browser uses innerText here, xmldom uses childNodes[0].data to get to it
         element.innerText = element.childNodes[0].data;
     }
     const html = element.innerText.trim();
     const i = html.indexOf('var _gcData = {');
     const j = html.indexOf('};', i) + 2;
     let tmp = html.substring(i, j);
-    tmp = tmp.replace('\"', '"');
     let gcData = '';
     try {
         // eslint-disable-next-line
         gcData = eval(`(function() {${tmp}; return _gcData; })();`);
     } catch (err) {
-        console.error('**** ERROR EVALING GCDATA!', err);
-        console.error('**** attempted eval: ', tmp);
-        // console.error('**** document is', doc);
-        console.error('start index was', i);
-        console.error('end index was', j);
-        return null;
+        try {
+            // NOTE: The 'contacts', 'phones', and other datasets that can get
+            // very large frequently contain data that is very difficult to parse
+            // out into something readable -- escaped quotes inside escaped quotes,
+            // when the outer layer shouldn't be escaped, but the inner layer should,
+            // CRs in the middle of text strings that shouldn't be there, and all
+            // sorts of other nastiness -- the browser just eats that stuff and
+            // moves on like nothing's wrong, but Node is (correctly!) blowing up on it.
+            // One of my accounts that has very few contacts works fine, but my main
+            // account with many hundreds of contacts in the list definitely does not.
+            const l = tmp.indexOf("'contacts'");
+            const m = tmp.indexOf("'_rnr_se'");
+            tmp = tmp.substring(0, l - 1) + tmp.substring(m);
+            // eslint-disable-next-line
+            gcData = eval(`(function() {${tmp}; return _gcData; })();`);
+        } catch (err2) {
+            console.error('**** ERROR EVALING GCDATA!', err2);
+            console.error('**** attempted eval: ', tmp);
+            // console.error('**** document is', doc);
+            console.error('start index was', i);
+            console.error('end index was', j);
+            return null;
+        }
     }
     return gcData;
 };
