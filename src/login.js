@@ -72,9 +72,18 @@ const gvLogin = ({ username, password, tokens }, callback) => {
                 tokens,
             },
         },
-        (doc) => {
+        (doc, xhr) => {
             // console.warn('*** expecting doc with gcData', doc);
             const x = doc.getElementsByTagName('script');
+            if (!x || x.length === 0) {
+                console.warn('**** debug', doc);
+                throw new Error('No script element found in login request');
+            }
+            const element = x[x.length - 1];
+            if (!element.innerText) {
+                console.warn('**** debug', xhr.responseText);
+                throw new Error('Element does not have innerText?!');
+            }
             const html = x[x.length - 1].innerText.trim();
             const i = html.indexOf('var _gcData = {');
             const j = html.indexOf('};', i) + 2;

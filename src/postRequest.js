@@ -11,7 +11,7 @@
 // const assert = require('assert');
 
 // shims for node.
-const entries = require('object.entries');
+const entries = require('object.entries'); // shouldn't be needed if using node >= 7.1.0 or 6.8.1 with --harmony
 const values = require('object.values');
 
 // const obj = { a: 1, b: 2, c: 3 };
@@ -35,6 +35,10 @@ if (!Object.values) {
     values.shim();
 }
 
+if (!Object.prototype.entries) {
+    Object.prototype.entries = entries.getPolyfill();
+}
+
 // assert.deepEqual(Object.entries(obj), expected);
 
 // if browser, use built-in XMLHttpRequest, if not require it in.
@@ -47,7 +51,7 @@ let getElementsByName;
 if (typeof window !== 'undefined') {
     XMLHR = window.XMLHttpRequest;
 } else {
-    XMLHR = require('node-xmlhttprequest').XMLHttpRequest;
+    XMLHR = require('xmlhttprequest-cookie').XMLHttpRequest;
     getElementsByName = function (arg) {
         console.warn('**** getElementsByName', arg);
         const returnList = [];

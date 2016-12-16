@@ -23,6 +23,10 @@ if (!Object.values) {
     values.shim();
 }
 
+if (!Object.prototype.entries) {
+    Object.prototype.entries = entries.getPolyfill();
+}
+
 // assert.deepEqual(Object.entries(obj), expected);
 
 // use window XMLHttpRequest or require one if it's not there, see comments in postRequest also
@@ -32,7 +36,7 @@ let getElementsByName;
 if (typeof window !== 'undefined') {
     XMLHR = window.XMLHttpRequest;
 } else {
-    XMLHR = require('node-xmlhttprequest').XMLHttpRequest;
+    XMLHR = require('xmlhttprequest-cookie').XMLHttpRequest;
     getElementsByName = function (arg) {
         const returnList = [];
         const buildReturn = (startPoint) => {
@@ -94,7 +98,7 @@ const getRequest = (uri, { params = {}, options = {} } = {}, callback = null) =>
     }
     if (callback != null) {
         xhr.onload = (/* err */) => {
-            console.warn('**** get onload xhr=', xhr);
+            // console.warn('**** get onload xhr=', xhr);
             switch (xhr.responseType) {
                 // eslint no-case-declarations: 0
                 case 'document':
