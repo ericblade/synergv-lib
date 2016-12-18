@@ -1,4 +1,4 @@
-// TODO: Not tested.
+// Tested, working 18Dec2016
 
 const postRequest = require('./postRequest');
 const methodUris = require('./uris').methodUris;
@@ -14,7 +14,7 @@ const markRead = (messages, read, tokens, callback) => {
             params,
             options: {
                 tokens,
-                requestType: 'document',
+                responseType: 'json',
             },
         },
         callback

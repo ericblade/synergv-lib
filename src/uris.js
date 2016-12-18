@@ -67,7 +67,7 @@ const methodUris = {
     getPhoneInfo: `${baseUris.b0Base}/settings/tab/phones`,
     getTranscriptTiming: `${baseUris.base}/media/transcriptWords`,
     login: `${baseUris.accountsBase}/signin/challenge/sl/password`,
-    markRead: `${baseUris.base}/mark`,
+    markRead: `${baseUris.base}/inbox/mark`,
     restoreTranscript: `${baseUris.base}/restoreTranscript`,
     saveNote: `${baseUris.base}/savenote`,
     saveTranscript: `${baseUris.base}/saveTranscript`,

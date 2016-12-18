@@ -14,6 +14,7 @@ const getDoNotDisturb = require('./getDoNotDisturb');
 const getPhoneInfo = require('./getPhoneInfo');
 const getTranscriptTiming = require('./getTranscriptTiming');
 const login = require('./login');
+const markRead = require('./markRead');
 const restoreTranscript = require('./restoreTranscript');
 const saveNote = require('./saveNote');
 const saveTranscript = require('./saveTranscript');
@@ -38,6 +39,7 @@ module.exports = {
     getPhoneInfo,
     getTranscriptTiming,
     login,
+    markRead,
     restoreTranscript,
     saveNote,
     saveTranscript,
