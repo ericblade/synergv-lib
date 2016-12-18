@@ -1,7 +1,31 @@
 const getRequest = require('./getRequest');
 const methodUris = require('./uris').methodUris;
 
+let ThisDOMParser;
+let getElementsByClassName;
+
+if (typeof window === 'undefined') {
+    ThisDOMParser = require('xmldom').DOMParser;
+
+    getElementsByClassName = (d, search) => {
+        const results = [];
+        const elements = d.getElementsByTagName('*');
+        const pattern = new RegExp(`(^|\\s)${search}(\\s|$)`);
+        for (let i = 0; i < elements.length; i += 1) {
+            if (pattern.test(elements[i].getAttribute('class'))) {
+                results.push(elements[i]);
+            }
+        }
+        return results;
+    };
+} else {
+    ThisDOMParser = DOMParser;
+}
+
 const getMessagesFromSMSRow = (row) => {
+    if (!row.getElementsByClassName) {
+        row.getElementsByClassName = getElementsByClassName.bind(row, row);
+    }
     const ret = {
         sentBy: row.getElementsByClassName('gc-message-sms-from')[0].textContent.trim(),
         sentTime: row.getElementsByClassName('gc-message-sms-time')[0].textContent.trim(),
@@ -25,36 +49,48 @@ const getMessagesFromSMSRow = (row) => {
 // out how I want it merged for my uses.
 
 const getJSONfromResponseCDATA = (x) => {
-    // console.warn('*** getJSONfrom', x);
     let elementList = x.getElementsByTagName('json');
     // we probably only want the first one, there's probably only ever one. we hope.
     let text = elementList[0].innerHTML;
-    let i = text.indexOf('{');
-    let j = text.indexOf(']]>');
-    const jsonData = JSON.parse(text.substring(i, j)); // TODO: should probably have a try
+    if (!text) {
+        text = elementList[0].childNodes[0].data; // TODO: node xmldom has just the JSON here! i wonder if there's a way to do that in browser. (or does this way work directly?)
+    } else {
+        const i = text.indexOf('{');
+        const j = text.indexOf(']]>');
+        text = text.substring(i, j);
+    }
+    const jsonData = JSON.parse(text); // TODO: should probably have a try..catch
     let htmlData = '';
     let outMsgs = [];
-    // console.warn("*** parsing", tmp);
 
     elementList = x.getElementsByTagName('html');
     if (elementList.length) {
         text = elementList[0].innerHTML;
-        i = text.indexOf('<div id=');
-        j = text.indexOf('<div class="gc-footer">');
+        if (!text) {
+            text = elementList[0].childNodes[0].data;
+        }
+        const i = text.indexOf('<div id=');
+        const j = text.indexOf('<div class="gc-footer">');
         htmlData = text.substring(i, j);
-        // console.warn('**** htmlData=', htmlData);
 
-        const parser = new DOMParser();
+        const parser = new ThisDOMParser();
         htmlData = parser.parseFromString(htmlData, 'text/html');
-        console.warn('**** parsed htmlData=', htmlData);
 
         if (jsonData.messages) {
             const msgList = Object.keys(jsonData.messages);
-            // console.warn(`**** parsing message data for ${msgList}`);
 
             outMsgs = msgList.map((m) => {
-                const msgHtml = htmlData.getElementById(m);
-                // console.warn('**** msg', m, msgHtml);
+                let msgHtml = htmlData.getElementById(m);
+                if (!msgHtml) { // xmldom getElementById is only working for the first item, so traverse the tree ourselves..
+                    for (let x = 0; x < htmlData.childNodes.length; x++) {
+                        if (htmlData.childNodes[x].getAttribute && htmlData.childNodes[x].getAttribute('id') === m) {
+                            msgHtml = htmlData.childNodes[x];
+                        }
+                    }
+                }
+                if (!msgHtml.getElementsByClassName) {
+                    msgHtml.getElementsByClassName = getElementsByClassName.bind(msgHtml, msgHtml);
+                }
                 const smsMsgBlocks = msgHtml.getElementsByClassName('gc-message-sms-row');
                 // Note: getElementsByClassName returns an "array-like" item not an actual array. huh.
                 const parsedMsgs = Array.prototype.map.call(smsMsgBlocks, getMessagesFromSMSRow);
@@ -64,6 +100,10 @@ const getJSONfromResponseCDATA = (x) => {
                 // appear to be any other elements involved. why?
                 const portrait = msgHtml.getElementsByTagName('img')[0];
                 const hasVmMessage = msgHtml.getElementsByClassName('gc-message-play');
+                // TODO: can we inject getElementsByClassName to the Element prototype? or the Document prototype? so we don't have to inject it to every individual object?!
+                if (hasVmMessage && hasVmMessage[0] && !hasVmMessage[0].getElementsByClassName) {
+                    hasVmMessage[0].getElementsByClassName = getElementsByClassName.bind(hasVmMessage[0], hasVmMessage[0]);
+                }
                 let vmMessageLength = 'unknown';
                 if (hasVmMessage) {
                     const lengthBlock = hasVmMessage[0] && hasVmMessage[0].getElementsByClassName('goog-inline-block');
