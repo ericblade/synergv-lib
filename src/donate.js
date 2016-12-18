@@ -14,7 +14,7 @@ const donate = (messages, donateBool, tokens, callback) => {
             params,
             options: {
                 tokens,
-                requestType: 'document',
+                responseType: 'document',
             },
         },
         callback

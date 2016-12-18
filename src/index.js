@@ -1,3 +1,4 @@
+const archiveMessages = require('./archiveMessages');
 const blockMessage = require('./blockMessage');
 const callCancel = require('./callCancel');
 const callNumber = require('./callNumber');
@@ -23,6 +24,7 @@ const sendMessage = require('./sendMessage');
 const settings = require('./settings');
 
 module.exports = {
+    archiveMessages,
     blockMessage,
     callCancel,
     callNumber,

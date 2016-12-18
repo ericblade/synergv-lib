@@ -14,7 +14,7 @@ const restoreTranscript = (callId, tokens, callback) => {
             params,
             options: {
                 tokens,
-                requestType: 'document',
+                responseType: 'document',
             },
         },
         callback

@@ -14,7 +14,7 @@ const searchMessages = (str, page, tokens, callback) => {
             },
             options: {
                 tokens,
-                requestType: 'document',
+                responseType: 'document',
             },
         },
         callback

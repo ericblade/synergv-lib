@@ -15,7 +15,7 @@ const callNumber = (outgoingNumber, forwardingNumber, phoneType, tokens, callbac
             params,
             options: {
                 tokens,
-                requestType: 'document',
+                responseType: 'document',
             },
         },
         callback

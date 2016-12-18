@@ -1,4 +1,4 @@
-// TODO: Not tested.
+// Tested 18Dec2016
 
 const postRequest = require('./postRequest');
 const methodUris = require('./uris').methodUris;
@@ -6,7 +6,7 @@ const methodUris = require('./uris').methodUris;
 const archiveMessages = (messages, archive, tokens, callback) => {
     const params = {
         messages,
-        archive,
+        archive: archive ? 1 : 0,
     };
     postRequest(
         methodUris.archiveMessages,
@@ -14,7 +14,7 @@ const archiveMessages = (messages, archive, tokens, callback) => {
             params,
             options: {
                 tokens,
-                requestType: 'document',
+                responseType: 'json',
             },
         },
         callback

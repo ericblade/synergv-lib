@@ -14,7 +14,7 @@ const blockMessage = (messages, blocked, tokens, callback) => {
             params,
             options: {
                 tokens,
-                requestType: 'document',
+                responseType: 'document',
             },
         },
         callback

@@ -150,7 +150,7 @@ const postRequest = XMLHR ? // Browser version of postRequest function
 }
 : // Node version of postRequest function.
 (url, { params = {}, options = {} } = {}, callback = null) => {
-    console.warn('**** node specific postRequest');
+    console.warn('**** node specific postRequest', params);
     const postData = params;
     if (options.tokens) {
         if (options.tokens.rnr) {
@@ -167,8 +167,13 @@ const postRequest = XMLHR ? // Browser version of postRequest function
         console.warn('***', response.request.uri);
         switch (options.responseType) {
             case 'json':
-                callback(JSON.parse(body));
-                console.warn('**** posted data back as json');
+                try {
+                    callback(JSON.parse(body));
+                    console.warn('**** posted data back as json');
+                } catch (err) {
+                    console.warn('**** unable to JSON parse response!!!! response was', body);
+                    callback(body);
+                }
                 break;
             case 'document':
                 const doc = new DOMParser().parseFromString(body);

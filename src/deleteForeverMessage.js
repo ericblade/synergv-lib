@@ -14,7 +14,7 @@ const deleteForeverMessage = (messages, trash, tokens, callback) => {
             params,
             options: {
                 tokens,
-                requestType: 'document',
+                responseType: 'document',
             },
         },
         callback

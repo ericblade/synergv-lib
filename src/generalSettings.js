@@ -12,7 +12,7 @@ const generalSettings = (tokens, callback) => {
             params,
             options: {
                 tokens,
-                requestType: 'document',
+                responseType: 'document',
             },
         },
         callback
