@@ -6,7 +6,7 @@ const methodUris = require('./uris').methodUris;
 const markRead = (messages, read, tokens, callback) => {
     const params = {
         messages,
-        read,
+        read: read ? 1 : 0,
     };
     postRequest(
         methodUris.markRead,
