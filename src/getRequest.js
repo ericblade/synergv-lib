@@ -40,32 +40,7 @@ if (typeof window !== 'undefined') {
 } else {
     request = require('request').defaults({ jar: true });
     DOMParser = require('xmldom').DOMParser;
-    getElementsByName = function (arg) {
-        const returnList = [];
-        const buildReturn = (startPoint) => {
-            Object.values(startPoint).forEach((child) => {
-                if (child.nodeType === 1) {
-                    if (child.getAttribute('name') === arg) {
-                        returnList.push(child);
-                    }
-                    if (child.childNodes.length) {
-                        buildReturn(child.childNodes);
-                    }
-                }
-            });
-            // for (const child in startPoint) {
-            //     if (startPoint[child].nodeType != 1) {
-            //         continue;
-            //     }
-            //     if (startPoint[child].getAttribute('name') == arg) returnList.push(startPoint[child]);
-            //     if (startPoint[child].childNodes.length) {
-            //         buildReturn(startPoint[child].childNodes);
-            //     }
-            // }
-        };
-        buildReturn(this.childNodes);
-        return returnList;
-    };
+    getElementsByName = require('./getElementsShims').getElementsByName;
 }
 
 // params = parameters to send to server

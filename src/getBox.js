@@ -1,23 +1,13 @@
 const getRequest = require('./getRequest');
 const methodUris = require('./uris').methodUris;
+const getCDATASectionsByTagName = require('./getElementsShims').getCDATASectionsByTagName;
 
 let ThisDOMParser;
 let getElementsByClassName;
 
 if (typeof window === 'undefined') {
     ThisDOMParser = require('xmldom').DOMParser;
-
-    getElementsByClassName = (d, search) => {
-        const results = [];
-        const elements = d.getElementsByTagName('*');
-        const pattern = new RegExp(`(^|\\s)${search}(\\s|$)`);
-        for (let i = 0; i < elements.length; i += 1) {
-            if (pattern.test(elements[i].getAttribute('class'))) {
-                results.push(elements[i]);
-            }
-        }
-        return results;
-    };
+    getElementsByClassName = require('./getElementsByClassName').getElementsByClassName;
 } else {
     ThisDOMParser = DOMParser;
 }
@@ -49,23 +39,16 @@ const getMessagesFromSMSRow = (row) => {
 // out how I want it merged for my uses.
 
 const getJSONfromResponseCDATA = (x) => {
-    let elementList = x.getElementsByTagName('json');
-    // we probably only want the first one, there's probably only ever one. we hope.
-    let text = elementList[0].innerHTML;
-    if (!text) {
-        text = elementList[0].childNodes[0].data; // TODO: node xmldom has just the JSON here! i wonder if there's a way to do that in browser. (or does this way work directly?)
-    } else {
-        const i = text.indexOf('{');
-        const j = text.indexOf(']]>');
-        text = text.substring(i, j);
-    }
-    const jsonData = JSON.parse(text); // TODO: should probably have a try..catch
+    const jsonList = getCDATASectionsByTagName(x, 'json');
+    // get CDATA json, parse it. I've only ever seen one 'json' tag in a document, hopefully that
+    // is all there ever is.
+    const jsonData = JSON.parse(jsonList[0]); // TODO: should probably have a try..catch
     let htmlData = '';
     let outMsgs = [];
 
-    elementList = x.getElementsByTagName('html');
+    const elementList = x.getElementsByTagName('html');
     if (elementList.length) {
-        text = elementList[0].innerHTML;
+        let text = elementList[0].innerHTML;
         if (!text) {
             text = elementList[0].childNodes[0].data;
         }
@@ -116,6 +99,8 @@ const getJSONfromResponseCDATA = (x) => {
         }
     }
     return { jsonData, messages: outMsgs };
+    // TODO: All known consumers of this function end up further re-mapping the data to make sense
+    // out of it.  See also samples/getbox.  This should probably be done here instead.
 };
 
 // TESTED 10/29/16

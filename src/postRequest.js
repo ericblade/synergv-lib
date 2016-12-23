@@ -55,25 +55,7 @@ if (typeof window !== 'undefined') {
 } else {
     request = require('request').defaults({ jar: true });
     DOMParser = require('xmldom').DOMParser;
-    getElementsByName = function (arg) {
-        console.warn('**** getElementsByName', arg);
-        const returnList = [];
-        const buildReturn = (startPoint) => {
-            Object.values(startPoint).forEach((child) => {
-                if (child.nodeType === 1) {
-                    if (child.getAttribute('name') === arg) {
-                        console.warn('**** get ElementsByName found', arg, child);
-                        returnList.push(child);
-                    }
-                    if (child.childNodes.length) {
-                        buildReturn(child.childNodes);
-                    }
-                }
-            });
-        };
-        buildReturn(this.childNodes);
-        return returnList;
-    };
+    getElementsByName = require('./getElementsShims').getElementsByName;
 }
 
 const urlEncodeFormData = (fd) => {

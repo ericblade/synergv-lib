@@ -5,6 +5,8 @@ const methodUris = require('./uris').methodUris;
 // TODO: anything else in /xpc/ ?
 // TODO: There are at least: clients4.google.com/voice/xpc/checkMessages, /voice/xpc/checkContacts, /voice/xpc/getContacts
 // TODO: unrelated to this function, but MrGecko had code for the newer? contacts interface, it looks like: https://github.com/GRMrGecko/VoiceMac/blob/610dc8126f10b676fda4d573fb1983f9f17c248e/Classes/VoiceBase/AddressBook/MGMGoogleContacts.m
+// TODO: Probably does not work in Node, as the node.js login process does not implement the
+// "xpc" parts of the login, currently
 
 // TESTED 11/02/16
 // WORKING!
