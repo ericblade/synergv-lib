@@ -22,6 +22,7 @@ const saveTranscript = require('./saveTranscript');
 const searchMessages = require('./searchMessages');
 const sendMessage = require('./sendMessage');
 const settings = require('./settings');
+const tokenStore = require('./tokenStore');
 
 module.exports = {
     archiveMessages,
@@ -48,4 +49,5 @@ module.exports = {
     searchMessages,
     sendMessage,
     settings,
+    tokenStore,
 };

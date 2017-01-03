@@ -12,7 +12,7 @@ const getElementsByClassName = (d, search) => {
     const elements = d.getElementsByTagName('*');
     const pattern = new RegExp(`(^|\\s)${search}(\\s|$)`);
     for (const element in elements) {
-        if (pattern.test(element.getAttribute('class'))) {
+        if (element.getAttribute && pattern.test(element.getAttribute('class'))) {
             results.push(element);
         }
     }
@@ -50,11 +50,17 @@ const getElementsByName = function (arg) {
 
 const getCDATASectionsByTagName = function(doc, tag) {
     const results = [];
+    if (!doc.getElementsByTagName) {
+        throw { error: 'getCDATA did not receive a document' };
+    }
     const elementList = doc.getElementsByTagName(tag);
     for (const element in elementList) {
-        let text = element.innerHTML; // browser
+        let text = elementList[element].innerHTML; // browser
         if (!text) {
-            text = element.childNodes[0].data; // TODO: In Node xmldom, this extracts the entire text without having to further parse it. We should see if that also works in browser, or something similar can be done in browser.
+            if (!elementList[element].childNodes || !elementList[element].childNodes.length)
+                continue;
+            text = elementList[element].childNodes[0].data;
+            // TODO: In Node xmldom, this extracts the entire text without having to further parse it. We should see if that also works in browser, or something similar can be done in browser.
         } else {
             const i = text.indexOf('{');
             const j = text.indexOf(']]>');

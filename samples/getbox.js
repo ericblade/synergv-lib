@@ -4,9 +4,10 @@ const getBox = require('..').getBox;
 // provided by babelifying something that used the spread operator in a way node doesn't understand
 const _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-login.login(() => {
-    getBox({ label: 'inbox', p: 1 }, login.tokens, (inMessages) => {
-        console.warn('**** messages received');
+login.login()
+    .then(() => getBox({ label: 'inbox', p: 1 }))
+    .then((inMessages) => {
+        console.warn('**** messages received', inMessages);
         const metaData = inMessages.jsonData;
         const newMsgs = Object.values(metaData.messages).map((m, idx) => {
             // grab the "messages" subobject, parse out the actual messages
@@ -20,11 +21,10 @@ login.login(() => {
             }
             const parsedInfo = inMessages.messages[idx][m.id];
 
-            const messages = parsedInfo.messages,
-                location = parsedInfo.location,
-                vmMessageLength = parsedInfo.vmMessageLength,
-                portrait = parsedInfo.portrait;
-
+            const messages = parsedInfo.messages;
+            const location = parsedInfo.location;
+            const vmMessageLength = parsedInfo.vmMessageLength;
+            const portrait = parsedInfo.portrait;
 
             return _extends({}, m, {
                 messages,
@@ -35,5 +35,6 @@ login.login(() => {
             });
         });
         console.warn('*** messages', newMsgs);
+    }).catch((err) => {
+        console.warn('**** ERROR RETRIEVING INBOX', err);
     });
-});

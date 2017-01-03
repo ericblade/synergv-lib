@@ -1,5 +1,7 @@
 const getRequest = require('./getRequest');
 const methodUris = require('./uris').methodUris;
+const tokenStore = require('./tokenStore');
+
 const getCDATASectionsByTagName = require('./getElementsShims').getCDATASectionsByTagName;
 
 let ThisDOMParser;
@@ -7,7 +9,7 @@ let getElementsByClassName;
 
 if (typeof window === 'undefined') {
     ThisDOMParser = require('xmldom').DOMParser;
-    getElementsByClassName = require('./getElementsByClassName').getElementsByClassName;
+    getElementsByClassName = require('./getElementsShims').getElementsByClassName;
 } else {
     ThisDOMParser = DOMParser;
 }
@@ -40,6 +42,9 @@ const getMessagesFromSMSRow = (row) => {
 
 const getJSONfromResponseCDATA = (x) => {
     const jsonList = getCDATASectionsByTagName(x, 'json');
+    if (!jsonList || !jsonList.length) {
+        return undefined;
+    }
     // get CDATA json, parse it. I've only ever seen one 'json' tag in a document, hopefully that
     // is all there ever is.
     const jsonData = JSON.parse(jsonList[0]); // TODO: should probably have a try..catch
@@ -137,14 +142,27 @@ const getJSONfromResponseCDATA = (x) => {
 // resultsPerPage seems a useless parameter, as no one seems to know how to request any more or
 // any fewer resultsPerPage.  totalSize might be interesting, but could be calculated quickly.
 
-const getBox = ({ label = 'inbox', p = 1 } = {}, tokens, callback) => {
-    getRequest(`${methodUris.getBox}/${label}/?page=p${p || 1}`,
-        {
-            options: { responseType: 'document' },
-        },
-        (resp) => {
-            callback(getJSONfromResponseCDATA(resp));
-        });
+const getBox = ({ label = 'inbox', p = 1 } = {}, tokens = tokenStore.getTokens()) => {
+    return new Promise((resolve, reject) => {
+        getRequest(`${methodUris.getBox}/${label}/?page=p${p || 1}`,
+            {
+                options: {
+                    responseType: 'document',
+                },
+            },
+            (resp) => {
+                try {
+                    const json = getJSONfromResponseCDATA(resp);
+                    if (!json) {
+                        reject({ error: 'Unable to parse JSON from data', doc: resp });
+                    } else {
+                        resolve(getJSONfromResponseCDATA(resp));
+                    }
+                } catch (err) {
+                    reject({ error: err, response: resp });
+                }
+            });
+    });
 };
 
 module.exports = getBox;
