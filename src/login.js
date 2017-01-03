@@ -188,14 +188,19 @@ const gvLogin = typeof window !== 'undefined' ? // Browser login function
 
 // TESTED 10/29/16
 // TODO: This is definitely going to need some error handling!!!!
-const login = (username, password, callback) => {
+// TODO: Convert this entire file to use Promises not callbacks
+const login = (username, password) => {
     // get GALX and gxf tokens, then use them to actually login.
     // callback will receive the tokens and gcData received from the login sequence.
-    getGALX(tokens => gvLogin({
-        username,
-        password,
-        tokens,
-    }, callback));
+    return new Promise((resolve, reject) => {
+        getGALX(tokens => gvLogin({
+            username,
+            password,
+            tokens,
+        }, (loginTokens) => {
+            resolve(loginTokens);
+        }));
+    });
 };
 
 module.exports = login;

@@ -5,17 +5,10 @@ const login = synergv.login;
 
 const [username, password] = process.argv.slice(2);
 
-const doLogin = () => {
-    return new Promise((resolve, reject) => {
-        login(username, password, (tokens) => {
-            tokenStore.setTokens(tokens);
-            resolve(tokens);
-        });
-    });
-};
+const doLogin = () => login(username, password).then(tokens => tokenStore.setTokens(tokens));
 
 if (require.main === module) {
-    doLogin(() => {
+    doLogin().then(() => {
         console.warn('**** tokens received');
         console.warn(tokenStore.getTokens());
     });
@@ -23,5 +16,4 @@ if (require.main === module) {
 
 module.exports = {
     login: doLogin,
-    // tokens,
 };
