@@ -59,7 +59,7 @@ function testResultIsOk(result, echoResult = false) {
 
 function testLabelNotPresent(conv, label) {
     if (conv.labels.indexOf(label) > -1) {
-        throw new Error(`Expected conversation to not have label ${label}`)
+        throw new Error(`Expected conversation to not have label ${label}`);
     }
     console.warn(`**** Conversation does not contain label ${label} as expected`);
     return true;
@@ -102,7 +102,7 @@ function header(str) {
 }
 
 function wait(time) {
-    return new Promise((resolve) => setTimeout(() => resolve(true), time));
+    return new Promise(resolve => setTimeout(() => resolve(true), time));
 }
 
 console.log('**** Logging in to retrieve tokens');
@@ -111,6 +111,10 @@ login.login()
 .then((...args) => testTokens(args))
 .then(() => header('getBillingCredit') || getBillingCredit())
 .then(resp => testResultIsOk(resp, true))
+/*
+ * Insert any tests that do NOT require having a conversation to work with ABOVE the following
+ * section, before conversation tests begin.
+ */
 .then(() => retrieveTestMessageFromBox()) // check for existing test messages
 .then((existingTests) => {
     if (existingTests.length) { // delete them permanently if found
@@ -135,16 +139,23 @@ login.login()
 .then(resp => testResultIsOk(resp, true))
 .then(() => header('Waiting 3 seconds for message to appear in Inbox') || wait(3000))
 .then(() => checkTestMessageCount(1))
-.then((testIds) => {
-    console.warn(`**** New Test Message Conversation Id: ${testIds[0]}`);
-    testId = testIds[0].id;
+.then((testConvs) => {
+    console.warn(`**** New Test Message Conversation: ${testConvs[0]}`);
+    console.warn(`**** There are ${testConvs[0].messages.length} messages in conversation.`);
+    if (testConvs[0].messages.length !== 2) {
+        console.warn('**** WARNING: Expected exactly 2 messages.This is a warning, not a failure.');
+    }
+    testConvs[0].messages.forEach((msg, index) => {
+        console.warn(`Message #${index}:`, msg);
+    });
+    testId = testConvs[0].id;
     return true;
 })
-
+// begin all tests that require a conversation to work
 .then(() => header('Archiving') || archiveMessages([testId], true))
 .then(resp => testResultIsOk(resp))
 .then(() => checkTestMessageCount(1, 'all'))
-.then((convs) => testLabelNotPresent(convs[0], 'Inbox'))
+.then(convs => testLabelNotPresent(convs[0], 'Inbox'))
 .then(() => header('Unarchiving') || archiveMessages([testId], false))
 .then(resp => testResultIsOk(resp))
 .then(() => checkTestMessageCount(1))
@@ -194,7 +205,13 @@ login.login()
 // how to test forward?
 // how to test generalSettings ?
 // test call and callCancel just before
-// test deleteForeverMessage last
+
+/*
+ * Add any new tests that involve operating on a message, above this comment.  The final test
+ * should always be deleting the test message as a final cleanup.
+ */
+.then(() => header('Deleting Test Message Forever...') || deleteForever([testId], true))
+.then(() => checkTestMessageCount(0))
 .catch((err) => {
     console.error('**** Error during tests:', err);
     throw err;
