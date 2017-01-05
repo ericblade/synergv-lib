@@ -56,7 +56,7 @@ const methodUris = {
     deleteForeverMessage: `${baseUris.base}/inbox/deleteForeverMessages`,
     deleteMessage: `${baseUris.base}/inbox/deleteMessages`,
     deleteNote: `${baseUris.base}/deletenote`,
-    donate: `${baseUris.base}/donate`,
+    donate: `${baseUris.base}/inbox/donate`,
     editDefaultForwarding: `${baseUris.base}/settings/editDefaultForwarding`,
     forward: `${baseUris.base}/inbox/reply/`,
     generalSettings: `${baseUris.base}/settings/editGeneralSettings/`,
@@ -68,13 +68,14 @@ const methodUris = {
     getTranscriptTiming: `${baseUris.base}/media/transcriptWords`,
     login: `${baseUris.accountsBase}/signin/challenge/sl/password`,
     markRead: `${baseUris.base}/inbox/mark`,
-    restoreTranscript: `${baseUris.base}/restoreTranscript`,
-    saveNote: `${baseUris.base}/savenote`,
-    saveTranscript: `${baseUris.base}/saveTranscript`,
+    rateTranscript: `${baseUris.base}/inbox/rateTranscript`,
+    restoreTranscript: `${baseUris.base}/inbox/restoreTranscript`,
+    saveNote: `${baseUris.base}/inbox/savenote`,
+    saveTranscript: `${baseUris.base}/inbox/saveTranscript`,
     searchMessages: `${baseUris.base}/inbox/search`,
     sendMessage: `${baseUris.base}/sms/send`,
     settings: `${baseUris.base}/settings/tab/settings`,
-    starMessage: `${baseUris.base}/star`,
+    starMessage: `${baseUris.base}/inbox/star`,
     vmDownload: `${baseUris.base}/media/send_voicemail`,
 };
 
@@ -84,6 +85,13 @@ module.exports = {
     uriParams,
     methodUris,
 };
+
+// TODO: rateTranscript
+// POST to /inbox/rateTranscript
+// args: messages: [ msgIds ]
+// rating: 1 (to rate as "useful"), 0 (to rate as "not useful")
+// _rnr_se
+
 
 // new discovery:
 // https://accounts.google.com/accountLoginInfoXhr

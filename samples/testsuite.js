@@ -12,12 +12,19 @@ const blockMessage = require('..').blockMessage;
 const deleteMessage = require('..').deleteMessage;
 const markRead = require('..').markRead;
 
+const getTranscriptTiming = require('..').getTranscriptTiming;
+const saveTranscript = require('..').saveTranscript;
+const restoreTranscript = require('..').restoreTranscript;
+
 const tokenStore = require('..').tokenStore;
 
 console.log(`**** synergv-lib test suite v${VERSION}`);
 
-let gcData = {};
-let testId = null;
+const testMessageText = 'TEST SUITE MESSAGE';
+
+let gcData = {}; // filled in from login
+let testId = null; // filled in from retrieval of inbox test message, or voicemail test message
+let vmTranscriptText = ''; // filled in during voicemail Transcript testing, stores original transcription
 
 function testTokens(args) {
     gcData = args[0];
@@ -42,7 +49,7 @@ function testTokens(args) {
 
 function sendTestMessage() {
     console.log(`**** sending test message from ${gcData.number.raw} to self for further testing.`);
-    return sendMessage({ recp: gcData.number.raw, text: 'TEST SUITE MESSAGE' });
+    return sendMessage({ recp: gcData.number.raw, text: testMessageText });
 }
 
 function testResultIsOk(result, echoResult = false) {
@@ -77,11 +84,25 @@ function retrieveTestMessageFromBox(box = 'inbox') {
     return new Promise((resolve, reject) => {
         getBox({ label: box, p: 1 })
         .then((conversations) => {
-            const results = conversations.filter(c => c.messageText === 'TEST SUITE MESSAGE' && c.phoneNumber === gcData.number.raw);
+            const results = conversations.filter(c => c.messageText === testMessageText && c.phoneNumber === gcData.number.raw);
             resolve(results);
         }).catch((err) => {
             throw new Error({ error: 'Error retrieving inbox?!', err });
         });
+    });
+}
+
+function retrieveVoiceMailConversation() {
+    console.warn('**** Searching for a Voicemail item');
+    return new Promise((resolve, reject) => {
+        getBox({ label: 'voicemail', p: 1 })
+        .then((conversations) => {
+            if (conversations.length === 0) {
+                throw new Error('Unable to proceed with Voicemail tests, no voicemails found.');
+            } else {
+                resolve(conversations[0]);
+            }
+        })
     });
 }
 
@@ -196,22 +217,52 @@ login.login()
 // TODO: Should also test that the "messages" array in the test conversation contains exactly two objects, and their contents as well!
 
 // how to test vmDownload?!
-// how to test restoreTranscript / saveTranscript ?
 // how to test getPhoneInfo?
-// how to test getTranscriptTiming?
 // how to test saveNote/deleteNote ?
-// how to test donate?
+// TODO: how to test donate? I do not see any information in the meta data that changes when "donate" is triggered.  Need to examine more carefully.
 // how to test editDefaultForwarding?
 // how to test forward?
 // how to test generalSettings ?
-// test call and callCancel just before
+// TODO: where to test callNumber and callCancel?
 
 /*
  * Add any new tests that involve operating on a message, above this comment.  The final test
  * should always be deleting the test message as a final cleanup.
  */
-.then(() => header('Deleting Test Message Forever...') || deleteForever([testId], true))
-.then(() => checkTestMessageCount(0))
+// .then(() => header('Deleting Test Message Forever...') || deleteForever([testId], true))
+// .then(() => checkTestMessageCount(0))
+/*
+ * Begin Voicemail Tests -- Since we can't send a Voicemail from this code, we have to depend on
+ * there being an already existing item in the Voicemail box.
+ * Since these depend on an existing conversation, they should always be done absolutely last
+ * as testing will abort at this point, if the conditions are not met (the conditions being, that
+ * there is something available in the voicemail box)
+ */
+// TODO: "vmMessageLength" is always undefined when testing from node.  Not sure if this is an error in node specific code, an error in our handling, or if that field just doesn't exist anymore on the server.
+
+.then(() => retrieveVoiceMailConversation())
+.then((vmConv) => {
+    testId = vmConv.id;
+    vmTranscriptText = vmConv.messageText;
+    console.warn('**** Voicemail found: ', vmConv);
+})
+
+// TODO: getTranscriptTiming does NOT work, I do not know how to get it to work, and I don't know
+// how to trigger it from the real website. :-S
+
+// .then(() => header('getTranscriptTiming') || getTranscriptTiming([testId]))
+// .then((resp) => {
+//     console.warn('**** getTranscriptTiming response', resp);
+// })
+.then(() => header('saveTranscript') || saveTranscript(testId, testMessageText))
+.then(resp => testResultIsOk(resp))
+.then(() => retrieveVoiceMailConversation()) // TODO: since we depend on the test voicemail being the top one in the list, receiving a voicemail during this process could cause failures. Should search for the id, to test, but the odds of this occurring are very low, so no big deal.
+.then(vmConv => testConversationValue(vmConv, 'messageText', testMessageText))
+.then(() => header('restoreTranscript') || restoreTranscript(testId))
+.then(resp => testResultIsOk(resp))
+.then(() => retrieveVoiceMailConversation()) // TODO: see above TODO
+.then(vmConv => testConversationValue(vmConv, 'messageText', vmTranscriptText))
+
 .catch((err) => {
     console.error('**** Error during tests:', err);
     throw err;

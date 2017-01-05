@@ -1,23 +1,27 @@
 // TODO: Not tested.
 
-const postRequest = require('./postRequest');
+const getRequest = require('./getRequest');
+const tokenStore = require('./tokenStore');
 const methodUris = require('./uris').methodUris;
 
-const getTranscriptTiming = (id, tokens, callback) => {
-    const params = {
-        id,
-    };
-    postRequest(
-        methodUris.getTranscriptTiming,
-        {
-            params,
-            options: {
-                tokens,
-                responseType: 'document',
+const getTranscriptTiming = (id, tokens = tokenStore.getTokens()) => {
+    console.warn('**** getTranscriptTiming tokens', tokens);
+    return new Promise((resolve, reject) => {
+        const params = {
+            id,
+        };
+        getRequest(
+            methodUris.getTranscriptTiming,
+            {
+                params,
+                options: {
+                    // tokens,
+                    responseType: '',
+                },
             },
-        },
-        callback
-    );
+            resp => resolve(resp)
+        );
+    });
 };
 
 module.exports = getTranscriptTiming;
