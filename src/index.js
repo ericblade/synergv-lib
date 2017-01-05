@@ -5,6 +5,8 @@ const callNumber = require('./callNumber');
 const checkContacts = require('./checkContacts');
 const checkMessages = require('./checkMessages');
 const contactQuickAdd = require('./contactQuickAdd');
+const deleteForeverMessage = require('./deleteForeverMessage');
+const deleteMessage = require('./deleteMessage');
 const deleteNote = require('./deleteNote');
 const donate = require('./donate');
 const editDefaultForwarding = require('./editDefaultForwarding');
@@ -32,6 +34,8 @@ module.exports = {
     checkContacts,
     checkMessages,
     contactQuickAdd,
+    deleteForeverMessage,
+    deleteMessage,
     deleteNote,
     donate,
     editDefaultForwarding,

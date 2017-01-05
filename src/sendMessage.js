@@ -1,5 +1,6 @@
 const postRequest = require('./postRequest');
 const methodUris = require('./uris').methodUris;
+const tokenStore = require('./tokenStore');
 
 // Original send: POST, Form Data:
 // id: (conversationId)
@@ -17,24 +18,26 @@ const methodUris = require('./uris').methodUris;
 
 // TESTED 02Dec2016 - works!
 
-const sendMessage = (tokens, { recp, text, conversationId }, callback) => {
-    const params = {
-        phoneNumber: recp,
-        text,
-        id: conversationId || '',
-        conversationId: conversationId || ''
-    };
-    postRequest(
-        methodUris.sendMessage,
-        {
-            options: {
-                tokens,
-                responseType: 'json',
+const sendMessage = ({ recp, text, conversationId }, tokens = tokenStore.getTokens()) => {
+    return new Promise((resolve, reject) => {
+        const params = {
+            phoneNumber: recp,
+            text,
+            id: conversationId || '',
+            conversationId: conversationId || ''
+        };
+        postRequest(
+            methodUris.sendMessage,
+            {
+                options: {
+                    tokens,
+                    responseType: 'json',
+                },
+                params,
             },
-            params,
-        },
-        callback
-    );
+            (resp) => resolve(resp),
+        );
+    });
 };
 
 module.exports = sendMessage;

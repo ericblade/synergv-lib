@@ -67,11 +67,11 @@ const getJSONfromResponseCDATA = (x) => {
         if (jsonData.messages) {
             const msgList = Object.keys(jsonData.messages);
 
-            outMsgs = msgList.map((m) => {
-                let msgHtml = htmlData.getElementById(m);
+            outMsgs = msgList.map((convId) => {
+                let msgHtml = htmlData.getElementById(convId);
                 if (!msgHtml) { // xmldom getElementById is only working for the first item, so traverse the tree ourselves..
                     for (let x = 0; x < htmlData.childNodes.length; x++) {
-                        if (htmlData.childNodes[x].getAttribute && htmlData.childNodes[x].getAttribute('id') === m) {
+                        if (htmlData.childNodes[x].getAttribute && htmlData.childNodes[x].getAttribute('id') === convId) {
                             msgHtml = htmlData.childNodes[x];
                         }
                     }
@@ -80,13 +80,16 @@ const getJSONfromResponseCDATA = (x) => {
                     msgHtml.getElementsByClassName = getElementsByClassName.bind(msgHtml, msgHtml);
                 }
                 const smsMsgBlocks = msgHtml.getElementsByClassName('gc-message-sms-row');
+                // console.warn('********* smsMsgBlocks', smsMsgBlocks);
                 // Note: getElementsByClassName returns an "array-like" item not an actual array. huh.
                 const parsedMsgs = Array.prototype.map.call(smsMsgBlocks, getMessagesFromSMSRow);
                 const locationElement = msgHtml.getElementsByClassName('gc-message-location')[0];
                 const location = (locationElement && locationElement.textContent.trim()) || null;
                 // TODO: for some reason can't directly access src from here, though there doesn't
                 // appear to be any other elements involved. why?
-                const portrait = msgHtml.getElementsByTagName('img')[0];
+                let portrait = msgHtml.getElementsByTagName('img')[0];
+                if (portrait && portrait.getAttribute)
+                    portrait = portrait.getAttribute('src');
                 const hasVmMessage = msgHtml.getElementsByClassName('gc-message-play');
                 // TODO: can we inject getElementsByClassName to the Element prototype? or the Document prototype? so we don't have to inject it to every individual object?!
                 if (hasVmMessage && hasVmMessage[0] && !hasVmMessage[0].getElementsByClassName) {
@@ -99,13 +102,20 @@ const getJSONfromResponseCDATA = (x) => {
                         vmMessageLength = lengthBlock[0].innerHTML;
                     }
                 }
-                return { [m]: { messages: parsedMsgs, location, vmMessageLength, portrait } };
+
+                const convMetaData = jsonData.messages[convId];
+                return {
+                    ...convMetaData,
+                    messages: parsedMsgs,
+                    location,
+                    portrait,
+                    vmMessageLength,
+                }
             });
+
         }
     }
-    return { jsonData, messages: outMsgs };
-    // TODO: All known consumers of this function end up further re-mapping the data to make sense
-    // out of it.  See also samples/getbox.  This should probably be done here instead.
+    return outMsgs;
 };
 
 // TESTED 10/29/16

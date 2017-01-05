@@ -99,23 +99,23 @@ const getRequest = XMLHR ? // Browser getRequest
 }
 : // Node getRequest
 (url, { params = {}, options = {} } = {}, callback = null) => {
-    console.warn('*** node specific getRequest');
+    // console.warn('*** node specific getRequest');
     request.get({ url, qs: params }, (error, response, body) => {
         switch (options.responseType) {
             case 'json':
                 callback(JSON.parse(body));
-                console.warn('*** get body returned as json');
+                // console.warn('*** get body returned as json');
                 break;
             case 'document':
                 const doc = new DOMParser().parseFromString(body);
                 doc.getElementsByName = getElementsByName.bind(doc);
                 callback(doc);
-                console.warn('*** get body returned as doc');
+                // console.warn('*** get body returned as doc');
                 break;
             case '': // fallthrough
             default:
                 callback(body);
-                console.warn('*** get body returned as text');
+                // console.warn('*** get body returned as text');
                 break;
         }
     });

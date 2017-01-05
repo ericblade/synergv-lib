@@ -132,7 +132,7 @@ const postRequest = XMLHR ? // Browser version of postRequest function
 }
 : // Node version of postRequest function.
 (url, { params = {}, options = {} } = {}, callback = null) => {
-    console.warn('**** node specific postRequest', params);
+    // console.warn('**** node specific postRequest', params);
     const postData = params;
     if (options.tokens) {
         if (options.tokens.rnr) {
@@ -146,12 +146,12 @@ const postRequest = XMLHR ? // Browser version of postRequest function
         }
     }
     request.post({ url, form: postData }, (error, response, body) => {
-        console.warn('***', response.request.uri);
+        // console.warn('***', response.request.uri);
         switch (options.responseType) {
             case 'json':
                 try {
                     callback(JSON.parse(body));
-                    console.warn('**** posted data back as json');
+                    // console.warn('**** posted data back as json');
                 } catch (err) {
                     console.warn('**** unable to JSON parse response!!!! response was', body);
                     callback(body);
@@ -161,12 +161,12 @@ const postRequest = XMLHR ? // Browser version of postRequest function
                 const doc = new DOMParser().parseFromString(body);
                 doc.getElementsByName = getElementsByName.bind(doc);
                 callback(doc);
-                console.warn('**** posted data back as document');
+                // console.warn('**** posted data back as document');
                 break;
             case '': // fallthrough
             default:
                 callback(body);
-                console.warn('**** posting data back without parsing...');
+                // console.warn('**** posting data back without parsing...');
                 break;
         }
     });

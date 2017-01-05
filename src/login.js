@@ -181,7 +181,7 @@ const gvLogin = typeof window !== 'undefined' ? // Browser login function
                 ...tokens,
                 rnr: gcData._rnr_se,
             };
-            callback(newTokens);
+            callback({ tokens: newTokens, gcData });
         });
     });
 };

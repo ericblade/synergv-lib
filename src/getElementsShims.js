@@ -10,8 +10,9 @@
 const getElementsByClassName = (d, search) => {
     const results = [];
     const elements = d.getElementsByTagName('*');
-    const pattern = new RegExp(`(^|\\s)${search}(\\s|$)`);
-    for (const element in elements) {
+    const pattern = new RegExp("(^|\\s)" + search + "(\\s|$)");
+    for (const e in elements) {
+        const element = elements[e];
         if (element.getAttribute && pattern.test(element.getAttribute('class'))) {
             results.push(element);
         }

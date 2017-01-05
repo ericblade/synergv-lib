@@ -19,9 +19,7 @@ const markRead = (messages, read, tokens = tokenStore.getTokens()) => {
                     responseType: 'json',
                 },
             },
-            (resp) => {
-                resolve(resp);
-            }
+            (resp) => resolve(resp)
         );
     });
 };
