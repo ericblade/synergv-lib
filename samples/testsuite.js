@@ -229,8 +229,8 @@ login.login()
  * Add any new tests that involve operating on a message, above this comment.  The final test
  * should always be deleting the test message as a final cleanup.
  */
-// .then(() => header('Deleting Test Message Forever...') || deleteForever([testId], true))
-// .then(() => checkTestMessageCount(0))
+.then(() => header('Deleting Test Message Forever...') || deleteForever([testId], true))
+.then(() => checkTestMessageCount(0))
 /*
  * Begin Voicemail Tests -- Since we can't send a Voicemail from this code, we have to depend on
  * there being an already existing item in the Voicemail box.
