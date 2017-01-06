@@ -1,24 +1,25 @@
-// TODO: Not tested.
-
 const postRequest = require('./postRequest');
+const tokenStore = require('./tokenStore');
 const methodUris = require('./uris').methodUris;
 
-const starMessage = (messages, star, tokens, callback) => {
-    const params = {
-        messages,
-        star,
-    };
-    postRequest(
-        methodUris.starMessage,
-        {
-            params,
-            options: {
-                tokens,
-                responseType: 'document',
+const starMessage = (messages, star, tokens = tokenStore.getTokens()) => {
+    return new Promise((resolve, reject) => {
+        const params = {
+            messages,
+            star: star ? 1 : 0,
+        };
+        postRequest(
+            methodUris.starMessage,
+            {
+                params,
+                options: {
+                    tokens,
+                    responseType: 'json',
+                },
             },
-        },
-        callback
-    );
+            resp => resolve(resp)
+        );
+    });
 };
 
 module.exports = starMessage;

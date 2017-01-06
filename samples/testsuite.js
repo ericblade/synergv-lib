@@ -1,6 +1,6 @@
 /* eslint no-console: "off" */
 
-const VERSION = '0.0.12';
+const VERSION = '0.0.13';
 const TestPhoneName = 'My Cell'; // Change this to whatever the name of your phone is in settings
 
 const login = require('./login');
@@ -12,6 +12,7 @@ const archiveMessages = require('..').archiveMessages;
 const blockMessage = require('..').blockMessage;
 const deleteMessage = require('..').deleteMessage;
 const markRead = require('..').markRead;
+const starMessage = require('..').starMessage;
 
 const saveNote = require('..').saveNote;
 const deleteNote = require('..').deleteNote;
@@ -235,6 +236,15 @@ login.login()
 .then(resp => testResultIsOk(resp))
 .then(() => checkTestMessageCount(1))
 .then(convs => testConversationValue(convs[0], 'isRead', false))
+
+.then(() => header('Star') || starMessage([testId], true))
+.then(resp => testResultIsOk(resp))
+.then(() => checkTestMessageCount(1))
+.then(convs => testConversationValue(convs[0], 'star', true))
+.then(() => header('UNstar') || starMessage([testId], false))
+.then(resp => testResultIsOk(resp))
+.then(() => checkTestMessageCount(1))
+.then(convs => testConversationValue(convs[0], 'star', false))
 
 .then(() => header('Save Note') || saveNote(testId, testMessageText))
 .then(resp => testResultIsOk(resp))

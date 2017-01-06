@@ -24,6 +24,7 @@ const saveTranscript = require('./saveTranscript');
 const searchMessages = require('./searchMessages');
 const sendMessage = require('./sendMessage');
 const settings = require('./settings');
+const starMessage = require('./starMessage');
 const tokenStore = require('./tokenStore');
 
 module.exports = {
@@ -53,5 +54,6 @@ module.exports = {
     searchMessages,
     sendMessage,
     settings,
+    starMessage,
     tokenStore,
 };
