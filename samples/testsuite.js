@@ -299,7 +299,7 @@ login.login()
 .then(() => header('Waiting 10 seconds for phone to ring...') || wait(10000))
 .then(() => header(`callCancel callId=${testCallId}`) || callCancel(testCallId))
 .then((resp) => {
-    console.warn(`**** callCancel results (ok: false is NORMAL here) ${JSON.strinigfy(resp)}`);
+    console.warn(`**** callCancel results (ok: false is NORMAL here) ${JSON.stringify(resp)}`);
 })
 .catch((err) => {
     console.error('**** Error during tests:', err);
