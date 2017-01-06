@@ -1,6 +1,6 @@
 /* eslint no-console: "off" */
 
-const VERSION = '0.0.11';
+const VERSION = '0.0.12';
 const TestPhoneName = 'My Cell'; // Change this to whatever the name of your phone is in settings
 
 const login = require('./login');
@@ -12,6 +12,9 @@ const archiveMessages = require('..').archiveMessages;
 const blockMessage = require('..').blockMessage;
 const deleteMessage = require('..').deleteMessage;
 const markRead = require('..').markRead;
+
+const saveNote = require('..').saveNote;
+const deleteNote = require('..').deleteNote;
 
 const getTranscriptTiming = require('..').getTranscriptTiming;
 const saveTranscript = require('..').saveTranscript;
@@ -74,7 +77,7 @@ function sendTestMessage() {
     return sendMessage({ recp: gcData.number.raw, text: testMessageText });
 }
 
-function testResultIsOk(result, echoResult = false) {
+function testResultIsOk(result, echoResult = true) {
     if (result.ok !== true) {
         throw new Error(`Failed. err=${JSON.stringify(result)}`);
     }
@@ -96,6 +99,9 @@ function testLabelNotPresent(conv, label) {
 function testConversationValue(conv, name, compareValue) {
     if (conv[name] !== compareValue) {
         throw new Error(`Expected variable ${name} to contain ${compareValue}, but it is ${conv[name]}`);
+    }
+    if (name === '') {
+        name = '(empty string)';
     }
     console.warn(`**** Conversation variable ${name} contains ${compareValue} as expected`);
 }
@@ -123,7 +129,7 @@ function retrieveVoiceMailConversation() {
             } else {
                 resolve(conversations[0]);
             }
-        })
+        });
     });
 }
 
@@ -229,6 +235,15 @@ login.login()
 .then(resp => testResultIsOk(resp))
 .then(() => checkTestMessageCount(1))
 .then(convs => testConversationValue(convs[0], 'isRead', false))
+
+.then(() => header('Save Note') || saveNote(testId, testMessageText))
+.then(resp => testResultIsOk(resp))
+.then(() => checkTestMessageCount(1))
+.then(convs => testConversationValue(convs[0], 'note', testMessageText))
+.then(() => header('Delete Note') || deleteNote(testId))
+.then(resp => testResultIsOk(resp))
+.then(() => checkTestMessageCount(1))
+.then(convs => testConversationValue(convs[0], 'note', ''))
 
 // how to test searchMessages? probably provide a search query for the test message, and validate that it ONLY has that message.
 // TODO: Now that I'm thinking about it, we should do a searchMessages on that at the very top instead of a Inbox get,

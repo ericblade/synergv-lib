@@ -61,7 +61,7 @@ const getGcDataFromDoc = (doc) => {
     if (!x || x.length === 0) {
         throw new Error('No script element found in login request');
     }
-    let element = x[x.length - 1];
+    const element = x[x.length - 1];
     if (!element.innerText) { // browser uses innerText here, xmldom uses childNodes[0].data to get to it
         element.innerText = element.childNodes[0].data;
     }

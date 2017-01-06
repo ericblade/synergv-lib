@@ -55,7 +55,7 @@ const methodUris = {
     contactQuickAdd: `${baseUris.base}/phonebook/quickAdd`,
     deleteForeverMessage: `${baseUris.base}/inbox/deleteForeverMessages`,
     deleteMessage: `${baseUris.base}/inbox/deleteMessages`,
-    deleteNote: `${baseUris.base}/deletenote`,
+    deleteNote: `${baseUris.base}/inbox/deletenote`, // NOTE (har har): NOT a capital N in Note !!
     donate: `${baseUris.base}/inbox/donate`,
     editDefaultForwarding: `${baseUris.base}/settings/editDefaultForwarding`,
     forward: `${baseUris.base}/inbox/reply/`,
@@ -70,7 +70,7 @@ const methodUris = {
     markRead: `${baseUris.base}/inbox/mark`,
     rateTranscript: `${baseUris.base}/inbox/rateTranscript`,
     restoreTranscript: `${baseUris.base}/inbox/restoreTranscript`,
-    saveNote: `${baseUris.base}/inbox/savenote`,
+    saveNote: `${baseUris.base}/inbox/savenote`, // NOTE (har har): NOT a capital N in Note!!
     saveTranscript: `${baseUris.base}/inbox/saveTranscript`,
     searchMessages: `${baseUris.base}/inbox/search`,
     sendMessage: `${baseUris.base}/sms/send`,
