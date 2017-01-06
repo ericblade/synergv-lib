@@ -1,3 +1,10 @@
+// TODO: Move this to a "tests" directory, modularize the functions that are used in testing,
+// modularize the actual tests, and then devise a system where individual tests can be run quickly
+// without running the entire suite.  Something like, if an individual test file is run, it will
+// login and run on it's own, otherwise it will be a module.
+
+// TODO: Figure out a way to run testsuite in browser
+
 /* eslint no-console: "off" */
 
 const VERSION = '0.0.13';
@@ -5,6 +12,7 @@ const TestPhoneName = 'My Cell'; // Change this to whatever the name of your pho
 
 const login = require('./login');
 const getBillingCredit = require('..').getBillingCredit;
+const getDoNotDisturb = require('..').getDoNotDisturb;
 const getBox = require('..').getBox;
 const sendMessage = require('..').sendMessage;
 const deleteForever = require('..').deleteForeverMessage;
@@ -161,6 +169,9 @@ login.login()
 
 .then(() => header('getBillingCredit') || getBillingCredit())
 .then(resp => testResultIsOk(resp, true))
+.then(() => header('getDoNotDisturb') || getDoNotDisturb())
+.then(resp => testResultIsOk(resp, true))
+
 /*
  * Insert any tests that do NOT require having a conversation to work with ABOVE the following
  * section, before conversation tests begin.
@@ -258,19 +269,12 @@ login.login()
 // how to test searchMessages? probably provide a search query for the test message, and validate that it ONLY has that message.
 // TODO: Now that I'm thinking about it, we should do a searchMessages on that at the very top instead of a Inbox get,
 // but I really want to get this code committed, so i'm writing that as a TODO for later.
-// TODO: After Mark test checks the "isRead" status of the messages, copy that to perform the Star test, and make sure
-// we test the "star" status (NOT "isStar" for some reason)
-
-// TODO: Should also test that the "messages" array in the test conversation contains exactly two objects, and their contents as well!
 
 // how to test vmDownload?!
-// how to test getPhoneInfo?
-// how to test saveNote/deleteNote ?
 // TODO: how to test donate? I do not see any information in the meta data that changes when "donate" is triggered.  Need to examine more carefully.
 // how to test editDefaultForwarding?
 // how to test forward?
 // how to test generalSettings ?
-// TODO: where to test callNumber and callCancel?
 
 /*
  * Add any new tests that involve operating on a message, above this comment.  The final test

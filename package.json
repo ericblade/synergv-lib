@@ -1,6 +1,6 @@
 {
   "name": "synergv-lib",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "description": "Unofficial Google Voice API developed for SynerGV application",
   "main": "dist/index.js",
   "scripts": {

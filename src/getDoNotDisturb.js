@@ -1,20 +1,22 @@
 const getRequest = require('./getRequest');
+const tokenStore = require('./tokenStore');
 const methodUris = require('./uris').methodUris;
 
-// TESTED 10/29/16
 // { ok: true, data: { enabled: false } }
 
-const getDoNotDisturb = (tokens, callback) => {
-    getRequest(
-        methodUris.getDoNotDisturb,
-        {
-            options: {
-                tokens,
-                responseType: 'json',
+const getDoNotDisturb = (tokens = tokenStore.getTokens()) => {
+    return new Promise((resolve, reject) => {
+        getRequest(
+            methodUris.getDoNotDisturb,
+            {
+                options: {
+                    tokens,
+                    responseType: 'json',
+                },
             },
-        },
-        callback
-    );
+            resp => resolve(resp)
+        );
+    });
 };
 
 module.exports = getDoNotDisturb;
