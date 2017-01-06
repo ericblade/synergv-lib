@@ -1,7 +1,6 @@
 const getRequest = require('./getRequest');
 const methodUris = require('./uris').methodUris;
 
-// TESTED 11/2/16, working, returns:
 // { ok: true, data: { contactPhones: { huge object }, contacts: { huge object }, hasContactCustomForwarding: false, hasGroupCustomForwarding: false }}
 
 // TODO: Last I knew, getRequest() wasn't working when given params, which is why the URLs for

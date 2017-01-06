@@ -1,30 +1,37 @@
 const getRequest = require('./getRequest');
+const tokenStore = require('./tokenStore');
+const getCDATASectionsByTagName = require('./getElementsShims').getCDATASectionsByTagName;
 const methodUris = require('./uris').methodUris;
 
-// TODO: This needs getJSONfromResponseCDATA from getBox -- however, that function needs
-// to be made much more generic, as right now it has functions specific to dealing with
-// the message blocks in the getBox call.
+const parsePhoneInfo = (doc) => {
+    let cdata = getCDATASectionsByTagName(doc, 'json');
+    cdata = String(cdata).trim();
+    const i = cdata.indexOf('{');
+    const j = cdata.lastIndexOf('}') + 1;
+    cdata = cdata.substring(i, j);
+    try {
+        cdata = JSON.parse(cdata);
+    } catch (err) {
+        throw new Error('Unable to parse cdata from getPhoneInfo');
+    }
+    const phoneArr = Object.keys(cdata.phones).map((p) => {
+        return cdata.phones[p];
+    });
+    return phoneArr;
+};
 
-// return a bunch of data about the phone configuration
-// see bottom of file for sample response, it's pretty large.
-// NOT TESTED 02Dec2016 NOT WORKING
-
-function getJSONfromResponseCDATA(resp) {
-    return resp;
-}
-
-const getPhoneInfo = (tokens, callback) => {
-    getRequest(
-        methodUris.getPhoneInfo,
-        {
-            options: {
-                responseType: 'document',
+const getPhoneInfo = (tokens = tokenStore.getTokens()) => {
+    return new Promise((resolve, reject) => {
+        getRequest(
+            methodUris.getPhoneInfo,
+            {
+                options: {
+                    responseType: 'document',
+                },
             },
-        },
-        (resp) => {
-            callback(getJSONfromResponseCDATA(resp));
-        }
-    );
+            resp => resolve(parsePhoneInfo(resp))
+        );
+    });
 };
 
 module.exports = getPhoneInfo;

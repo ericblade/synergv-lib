@@ -1,6 +1,7 @@
 /* eslint no-console: "off" */
 
-const VERSION = '0.0.9';
+const VERSION = '0.0.11';
+const TestPhoneName = 'My Cell'; // Change this to whatever the name of your phone is in settings
 
 const login = require('./login');
 const getBillingCredit = require('..').getBillingCredit;
@@ -16,6 +17,10 @@ const getTranscriptTiming = require('..').getTranscriptTiming;
 const saveTranscript = require('..').saveTranscript;
 const restoreTranscript = require('..').restoreTranscript;
 
+const getPhoneInfo = require('..').getPhoneInfo;
+const callNumber = require('..').callNumber;
+const callCancel = require('..').callCancel;
+
 const tokenStore = require('..').tokenStore;
 
 console.log(`**** synergv-lib test suite v${VERSION}`);
@@ -25,9 +30,26 @@ const testMessageText = 'TEST SUITE MESSAGE';
 let gcData = {}; // filled in from login
 let testId = null; // filled in from retrieval of inbox test message, or voicemail test message
 let vmTranscriptText = ''; // filled in during voicemail Transcript testing, stores original transcription
+let testPhoneInfo = {}; // filled in from getTestPhoneInfo
+let testCallId = ''; // filled in from callNumber test
 
+function getTestPhoneInfo() {
+    return new Promise((resolve, reject) => {
+        console.warn(`**** getPhoneInfo searching for phone called ${TestPhoneName}`);
+        getPhoneInfo()
+        .then((phoneData) => {
+            const testPhones = phoneData.filter(p => p.name === TestPhoneName);
+            if (testPhones.length === 0) {
+                throw new Error('No test phones found');
+            }
+            console.warn('**** found phone', testPhones[0]);
+            testPhoneInfo = testPhones[0];
+            resolve(testPhoneInfo);
+        });
+    });
+}
 function testTokens(args) {
-    gcData = args[0];
+    gcData = args.gcData;
     const tokens = tokenStore.getTokens();
     console.log('**** testing tokens');
     if (!tokens.GALX) {
@@ -54,14 +76,13 @@ function sendTestMessage() {
 
 function testResultIsOk(result, echoResult = false) {
     if (result.ok !== true) {
-        throw new Error('Failed. err=', result);
-    } else {
-        console.warn('**** Result OK: true');
-        if (echoResult) {
-            console.warn('**** Result was:', result);
-        }
-        return true;
+        throw new Error(`Failed. err=${JSON.stringify(result)}`);
     }
+    console.warn('**** Result OK: true');
+    if (echoResult) {
+        console.warn('**** Result was:', result);
+    }
+    return result;
 }
 
 function testLabelNotPresent(conv, label) {
@@ -129,7 +150,8 @@ function wait(time) {
 console.log('**** Logging in to retrieve tokens');
 
 login.login()
-.then((...args) => testTokens(args))
+.then(args => testTokens(args))
+
 .then(() => header('getBillingCredit') || getBillingCredit())
 .then(resp => testResultIsOk(resp, true))
 /*
@@ -263,6 +285,22 @@ login.login()
 .then(() => retrieveVoiceMailConversation()) // TODO: see above TODO
 .then(vmConv => testConversationValue(vmConv, 'messageText', vmTranscriptText))
 
+/*
+ * Test Phone Call Functions -- These require a forwarding phone, and we cannot validate that they
+ * work beyond the service responding that they did -- which it does, as long as the inputs that
+ * you give these functions are valid at a glance.  So, your forwarding phone will ring, and then
+ * it will stop ringing a few moments later, if the tests are successful.
+ */
+.then(() => getTestPhoneInfo())
+.then(() => header(`callNumber 909-390-0003 DO NOT ANSWER ${testPhoneInfo.phoneNumber}!`) || callNumber('+19093900003', testPhoneInfo.phoneNumber, testPhoneInfo.type))
+.then(resp => testResultIsOk(resp, true))
+// eslint-disable-next-line
+.then(resp => testCallId = resp.data.callId)
+.then(() => header('Waiting 10 seconds for phone to ring...') || wait(10000))
+.then(() => header(`callCancel callId=${testCallId}`) || callCancel(testCallId))
+.then((resp) => {
+    console.warn(`**** callCancel results (ok: false is NORMAL here) ${JSON.strinigfy(resp)}`);
+})
 .catch((err) => {
     console.error('**** Error during tests:', err);
     throw err;

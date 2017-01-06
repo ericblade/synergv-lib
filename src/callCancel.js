@@ -1,26 +1,28 @@
-// TODO: Not tested.
-
 const postRequest = require('./postRequest');
+const tokenStore = require('./tokenStore');
 const methodUris = require('./uris').methodUris;
 
-const callCancel = (tokens, callback) => {
+const callCancel = (callId, tokens = tokenStore.getTokens()) => {
     // gc.constants.CancelCallTypes = {CLICK_TO_CALL:"C2C", RECORDING:"RECORDING", VERIFY_FORWARDING:"VERIFY_FORWARDING"};
-    const params = {
-        outgoingNumber: '',
-        forwardingNumber: '',
-        cancelType: 'C2C',
-    };
-    postRequest(
-        methodUris.callCancel,
-        {
-            params,
-            options: {
-                tokens,
-                responseType: 'document',
+    return new Promise((resolve, reject) => {
+        const params = {
+            callId,
+            outgoingNumber: '',
+            forwardingNumber: '',
+            cancelType: 'C2C',
+        };
+        postRequest(
+            methodUris.callCancel,
+            {
+                params,
+                options: {
+                    tokens,
+                    responseType: 'json',
+                },
             },
-        },
-        callback
-    );
+            resp => resolve(resp)
+        );
+    });
 };
 
 module.exports = callCancel;

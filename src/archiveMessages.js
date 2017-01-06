@@ -1,5 +1,3 @@
-// Tested 18Dec2016
-
 const postRequest = require('./postRequest');
 const methodUris = require('./uris').methodUris;
 const tokenStore = require('./tokenStore');

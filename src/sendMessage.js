@@ -16,15 +16,13 @@ const tokenStore = require('./tokenStore');
 // If given an invalid number (cannot possibly be used): (official client says "Invalid Number" when receiving)
 // { ok: false, data: { code: 20 } }
 
-// TESTED 02Dec2016 - works!
-
 const sendMessage = ({ recp, text, conversationId }, tokens = tokenStore.getTokens()) => {
     return new Promise((resolve, reject) => {
         const params = {
             phoneNumber: recp,
             text,
             id: conversationId || '',
-            conversationId: conversationId || ''
+            conversationId: conversationId || '',
         };
         postRequest(
             methodUris.sendMessage,
@@ -35,7 +33,7 @@ const sendMessage = ({ recp, text, conversationId }, tokens = tokenStore.getToke
                 },
                 params,
             },
-            (resp) => resolve(resp),
+            resp => resolve(resp),
         );
     });
 };

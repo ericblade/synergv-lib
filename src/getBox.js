@@ -36,10 +36,6 @@ const getMessagesFromSMSRow = (row) => {
 // TODO: This function could probably use some cleanup. It's based on synergv 1, which
 // i was rank amateur for.
 
-// TODO: should probably also merge all the data together, since that's what any user is going
-// to probably do anyway, but for right now, i'm just going to leave it separate until I figure
-// out how I want it merged for my uses.
-
 const getJSONfromResponseCDATA = (x) => {
     const jsonList = getCDATASectionsByTagName(x, 'json');
     if (!jsonList || !jsonList.length) {
@@ -88,8 +84,9 @@ const getJSONfromResponseCDATA = (x) => {
                 // TODO: for some reason can't directly access src from here, though there doesn't
                 // appear to be any other elements involved. why?
                 let portrait = msgHtml.getElementsByTagName('img')[0];
-                if (portrait && portrait.getAttribute)
+                if (portrait && portrait.getAttribute) {
                     portrait = portrait.getAttribute('src');
+                }
                 const hasVmMessage = msgHtml.getElementsByClassName('gc-message-play');
                 // TODO: can we inject getElementsByClassName to the Element prototype? or the Document prototype? so we don't have to inject it to every individual object?!
                 if (hasVmMessage && hasVmMessage[0] && !hasVmMessage[0].getElementsByClassName) {
@@ -110,9 +107,8 @@ const getJSONfromResponseCDATA = (x) => {
                     location,
                     portrait,
                     vmMessageLength,
-                }
+                };
             });
-
         }
     }
     return outMsgs;

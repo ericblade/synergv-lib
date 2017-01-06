@@ -1,5 +1,3 @@
-// TODO: Not tested.
-
 const postRequest = require('./postRequest');
 const methodUris = require('./uris').methodUris;
 const tokenStore = require('./tokenStore');
