@@ -1,4 +1,5 @@
 const getRequest = require('./getRequest');
+const tokenStore = require('./tokenStore');
 const methodUris = require('./uris').methodUris;
 
 // TESTED 10/29/16
@@ -15,20 +16,22 @@ const methodUris = require('./uris').methodUris;
 // also discovered you don't need to go through all the /xpc/ token stuff to get this, you can just
 // call $baseurl/checkMessages .. heh
 
-const checkMessages = (tokens, callback) => {
-    getRequest(
-        `${methodUris.checkMessages}?r=${encodeURIComponent(tokens.r)}`,
-        {
-            params: {
-                r: tokens.r,
+const checkMessages = (tokens = tokenStore.getTokens()) => {
+    return new Promise((resolve, reject) => {
+        getRequest(
+            `${methodUris.checkMessages}?r=${encodeURIComponent(tokens.r)}`,
+            {
+                params: {
+                    r: tokens.r,
+                },
+                options: {
+                    tokens,
+                    responseType: 'json',
+                },
             },
-            options: {
-                tokens,
-                responseType: 'json',
-            },
-        },
-        callback
-    );
+            resp => resolve(resp)
+        );
+    });
 };
 
 module.exports = checkMessages;

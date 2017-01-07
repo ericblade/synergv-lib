@@ -1,3 +1,8 @@
+// WARNING: If you run this in Chrome developer mode, with a Mobile device selected as an emulation,
+// Google will send you the mobile page, even though you're requesting the desktop pages.  This
+// results in a completely broken login sequence.  This can probably be overridden, but I don't
+// remember how right at this time.
+
 const getRequest = require('./getRequest');
 const postRequest = require('./postRequest');
 const { tokenUris, uriParams, methodUris } = require('./uris');
@@ -186,7 +191,6 @@ const gvLogin = typeof window !== 'undefined' ? // Browser login function
     });
 };
 
-// TESTED 10/29/16
 // TODO: This is definitely going to need some error handling!!!!
 // TODO: Convert this entire file to use Promises not callbacks
 const login = (username, password) => {

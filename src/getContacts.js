@@ -1,4 +1,5 @@
 const getRequest = require('./getRequest');
+const tokenStore = require('./tokenStore');
 const methodUris = require('./uris').methodUris;
 
 // { ok: true, data: { contactPhones: { huge object }, contacts: { huge object }, hasContactCustomForwarding: false, hasGroupCustomForwarding: false }}
@@ -9,18 +10,22 @@ const methodUris = require('./uris').methodUris;
 // encodeURIComponent calls removed, since that should be handled automatically in getRequest
 
 // might be same as $baseurl/phonebook/getall
-const getContacts = (tokens, callback) => {
-    getRequest(
-        `${methodUris.getContacts}?r=${encodeURIComponent(tokens.r)}`,
-        {
-            params: {
-                r: tokens.r,
+const getContacts = (tokens = tokenStore.getTokens()) => {
+    return new Promise((resolve, reject) => {
+        getRequest(
+            `${methodUris.getContacts}?r=${encodeURIComponent(tokens.r)}`,
+            {
+                params: {
+                    r: tokens.r,
+                },
+                options: {
+                    tokens,
+                    responseType: 'json',
+                },
             },
-            options: {
-                tokens,
-                responseType: 'json',
-            },
-        }, callback);
+            resp => resolve(resp)
+        );
+    });
 };
 
 module.exports = getContacts;

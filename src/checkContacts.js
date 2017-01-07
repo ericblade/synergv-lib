@@ -1,4 +1,5 @@
 const getRequest = require('./getRequest');
+const tokenStore = require('./tokenStore');
 const methodUris = require('./uris').methodUris;
 
 // TODO: Investigate why getRequest params block isn't ending up in the URI as a get parameter. wat?
@@ -7,20 +8,22 @@ const methodUris = require('./uris').methodUris;
 // getContacts?  Not real sure. Mine returns time very close to right now, but I've only currently
 // tested it in conjunction with getContacts ...
 
-const checkContacts = (tokens, callback) => {
-    getRequest(
-        `${methodUris.checkContacts}?r=${encodeURIComponent(tokens.r)}`,
-        {
-            params: {
-                r: tokens.r,
+const checkContacts = (tokens = tokenStore.getTokens()) => {
+    return new Promise((resolve, reject) => {
+        getRequest(
+            `${methodUris.checkContacts}?r=${encodeURIComponent(tokens.r)}`,
+            {
+                params: {
+                    r: tokens.r,
+                },
+                options: {
+                    tokens,
+                    responseType: 'json',
+                },
             },
-            options: {
-                tokens,
-                responseType: 'json',
-            },
-        },
-        callback
-    );
+            resp => resolve(resp)
+        );
+    });
 };
 
 module.exports = checkContacts;
