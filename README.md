@@ -53,6 +53,8 @@ Most all of the functions available in the "src" directory work.  These will be 
 in future updates, as this API is finalizing.
 
 APIs that are known to not work at this time:
-checkContacts, checkMessages, contactQuickAdd, donate, editDefaultForwarding, forward,
-generalSettings, getContacts, searchMessages, settings, vmDownload
+contactQuickAdd, donate, editDefaultForwarding, forward,
+generalSettings, searchMessages, settings, vmDownload
 
+APIs that work in browser but not in node:
+checkContacts, checkMessages, getContacts
