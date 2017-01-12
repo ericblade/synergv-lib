@@ -51,13 +51,14 @@ const methodUris = {
     callCancel: `${baseUris.base}/call/cancel`,
     callNumber: `${baseUris.base}/call/connect`,
     checkContacts: `${baseUris.xpcBase}/checkContacts`,
-    checkMessages: `${baseUris.xpcBase}/checkMessages`,
+    // checkMessages: `${baseUris.xpcBase}/checkMessages`, // this one requires xpc token
+    checkMessages: `${baseUris.base}/inbox/checkMessages/`,
     contactQuickAdd: `${baseUris.base}/phonebook/quickAdd`,
     deleteForeverMessage: `${baseUris.base}/inbox/deleteForeverMessages`,
     deleteMessage: `${baseUris.base}/inbox/deleteMessages`,
     deleteNote: `${baseUris.base}/inbox/deletenote`, // NOTE (har har): NOT a capital N in Note !!
     donate: `${baseUris.base}/inbox/donate`,
-    editDefaultForwarding: `${baseUris.base}/settings/editDefaultForwarding`,
+    editDefaultForwarding: `${baseUris.base}/settings/editDefaultForwarding`, // TODO: 403 on Post or Get
     forward: `${baseUris.base}/inbox/reply/`,
     generalSettings: `${baseUris.base}/settings/editGeneralSettings/`,
     getBillingCredit: `${baseUris.base}/settings/billingcredit/`,
@@ -110,56 +111,54 @@ module.exports = {
     SUBSCRIBER_NAME:"/media/sendRecordedName/",
     VOICEMAIL_OGG:"/media/send_voicemail_ogg/"
 
-	APPEAL_SMS: gc.constants.APP_URI + "/sms/appeal",
-	BILLING_CREDIT: gc.constants.APP_URI + "/settings/billingcredit/",
-	BILLING_TRANS: gc.constants.APP_URI + "/settings/billingtrans/",
-	CANCEL_ORDER: gc.constants.APP_URI + "/billing/cancelOrder/",
-	CANCEL_PORT: gc.constants.APP_URI + "/porting/cancelPortIn/",
-	CANCEL_UPGRADE_CLIENT: gc.constants.APP_URI + "/settings/cancelUpgradeClient",
-	CHECK_CARRIER: gc.constants.APP_URI + "/settings/checkCarrier/",
-	CHECK_CREDIT_ORDER: gc.constants.APP_URI + "/settings/checkCreditOrder/",
-	CHECK_FOR_SHARING: gc.constants.APP_URI + "/settings/checkIllegalSharing",
-	CHECK_FORWARDING_VERIFIED: gc.constants.APP_URI + "/settings/checkForwardingVerified",
-	CHECK_FORWARDING_VERIFIED_NO_ACCOUNT: gc.constants.APP_URI + "/settings/checkVerifiedNoAccount",
-	CHECK_MESSAGES: gc.constants.APP_URI + "/inbox/checkMessages/",
-	CHECK_MOBILE_SETUP_OPTIONS: gc.constants.APP_URI + "/setup/checkMobileSetupOptions",
-	CHECK_NUMBER_FOR_PORTING: gc.constants.APP_URI + "/porting/checkNumber",
-	CHECK_SPAM_FILTER_ENABLED: gc.constants.APP_URI + "/settings/checkSpamFilterEnabled",
-	CONTACT_DETAILS: gc.constants.APP_URI + "/call/contactdetails/",
-	DELETE_FORWARDING: gc.constants.APP_URI + "/settings/deleteForwarding/",
-	DIVERSION_CODE: gc.constants.APP_URI + "/settings/getDiversionCode",
-	DIVERSION_CODE_COMPLETE: gc.constants.APP_URI + "/settings/diversionCodeComplete",
-	EDIT_BILLING_SETTINGS: gc.constants.APP_URI + "/billing/editSettings/",
-	EDIT_BUSINESS: gc.constants.APP_URI + "/settings/editOrg/",
-	EDIT_CONTACT: gc.constants.APP_URI + "/contacts/editContact/",
-	EDIT_FORWARDING: gc.constants.APP_URI + "/settings/editForwarding/",
-	EDIT_FORWARDING_SMS: gc.constants.APP_URI + "/settings/editForwardingSms/",
-	EDIT_GREETINGS: gc.constants.APP_URI + "/settings/editGreetings/",
-	EDIT_GROUP: gc.constants.APP_URI + "/settings/editGroup/",
-	EDIT_SETTINGS: gc.constants.APP_URI + "/settings/editGeneralSettings/",
-	EDIT_TRANSCRIPT_STATUS: gc.constants.APP_URI + "/settings/editTranscriptStatus/",
-	EDIT_VOICEMAIL_SMS: gc.constants.APP_URI + "/settings/editVoicemailSms/",
-	FORCE_FORWARDING_VERIFIED: gc.constants.APP_URI + "/settings/setInVerification",
-	GENERATE_EMBED_CODE: gc.constants.APP_URI + "/embed/generateEmbedTag",
+	APPEAL_SMS: gc.constants.APP_URI + "/sms/appeal", // POST: 500, GET: 403
+	BILLING_TRANS: gc.constants.APP_URI + "/settings/billingtrans/", // use GET: returns json and html cdata. json data is a bunch of settings, html is a link to a "Port Out" purchase
+	CANCEL_ORDER: gc.constants.APP_URI + "/billing/cancelOrder/", // POST: {"ok":false,"error":"APPLICATION_ERROR;grand_central/GcNewBilling.CancelOrder;Order undefined not found for user 449551689692\n","errorCode":31}
+	CANCEL_PORT: gc.constants.APP_URI + "/porting/cancelPortIn/", // POST: empty, GET: 403
+	CANCEL_UPGRADE_CLIENT: gc.constants.APP_URI + "/settings/cancelUpgradeClient", // POST: {"ok":true} // no idea what it does
+	CHECK_CARRIER: gc.constants.APP_URI + "/settings/checkCarrier/", // POST: empty response
+	CHECK_CREDIT_ORDER: gc.constants.APP_URI + "/settings/checkCreditOrder/", // POST: {"ok":true,"data":{"status":0,"balance":""}}
+	CHECK_FOR_SHARING: gc.constants.APP_URI + "/settings/checkIllegalSharing", // POST: empty response
+	CHECK_FORWARDING_VERIFIED: gc.constants.APP_URI + "/settings/checkForwardingVerified", // GET: {"ok":false,"verified":false}
+	CHECK_FORWARDING_VERIFIED_NO_ACCOUNT: gc.constants.APP_URI + "/settings/checkVerifiedNoAccount", // GET: {"ok":true,"verified":false}, POST: 403
+	CHECK_MOBILE_SETUP_OPTIONS: gc.constants.APP_URI + "/setup/checkMobileSetupOptions", // Error 403 no matter how i try to access
+	CHECK_NUMBER_FOR_PORTING: gc.constants.APP_URI + "/porting/checkNumber", // POST: {"ok":false,"data":{"carrier":"null","formattedPhoneNumber":"","transientError":false,"noFootprint":true,"unsupportedCarrier":true,"requirePin":false,"requireSsn":false}}
+	CHECK_SPAM_FILTER_ENABLED: gc.constants.APP_URI + "/settings/checkSpamFilterEnabled", // POST: {"ok":true,"isSpamFilterEnabled":false}
+	CONTACT_DETAILS: gc.constants.APP_URI + "/call/contactdetails/", POST: 403, GET: 500
+	DELETE_FORWARDING: gc.constants.APP_URI + "/settings/deleteForwarding/", // POST: empty response
+	DIVERSION_CODE: gc.constants.APP_URI + "/settings/getDiversionCode", // POST: 403, GET: 500
+	DIVERSION_CODE_COMPLETE: gc.constants.APP_URI + "/settings/diversionCodeComplete", // POST: 500, GET: 403
+	EDIT_BILLING_SETTINGS: gc.constants.APP_URI + "/billing/editSettings/", POST: {"ok":true}
+	EDIT_BUSINESS: gc.constants.APP_URI + "/settings/editOrg/", // POST: 403, GET: 404
+	EDIT_CONTACT: gc.constants.APP_URI + "/contacts/editContact/", // POST: {"ok":true,"result":{"ok":false,"error":"A system error has occurred"}}
+	EDIT_FORWARDING: gc.constants.APP_URI + "/settings/editForwarding/", // POST: 403, GET: 404
+	EDIT_FORWARDING_SMS: gc.constants.APP_URI + "/settings/editForwardingSms/", // POST: 403, GET: 404
+	EDIT_GREETINGS: gc.constants.APP_URI + "/settings/editGreetings/", // POST or GET: {"ok":true}
+	EDIT_GROUP: gc.constants.APP_URI + "/settings/editGroup/", // POST: 403, GET: 404
+	EDIT_SETTINGS: gc.constants.APP_URI + "/settings/editGeneralSettings/", // {"ok":true,"data":{"defaultGreetingId":0,"directConnect":false,"voicemailFeature1":false}}
+	EDIT_TRANSCRIPT_STATUS: gc.constants.APP_URI + "/settings/editTranscriptStatus/", // {"ok": true}
+	EDIT_VOICEMAIL_SMS: gc.constants.APP_URI + "/settings/editVoicemailSms/", // Error 500
+	FORCE_FORWARDING_VERIFIED: gc.constants.APP_URI + "/settings/setInVerification", // Error 500
+	GENERATE_EMBED_CODE: gc.constants.APP_URI + "/embed/generateEmbedTag", // Error 500
 	GET_CONTACT: gc.constants.APP_URI + "/contacts/getContactData/",
 	GET_CONTACTS: gc.constants.APP_URI + "/phonebook/getall/",
-	GET_NORMALIZED_NUMBER: gc.constants.APP_URI + "/setup/getNormalizedNumber/",
-	HELP_TEXT: gc.constants.APP_URI + "/help/helpText/",
-	NEW_NUMBER_SEARCH: gc.constants.APP_URI + "/setup/searchnew/",
+	GET_NORMALIZED_NUMBER: gc.constants.APP_URI + "/setup/getNormalizedNumber/", // Error 500
+	HELP_TEXT: gc.constants.APP_URI + "/help/helpText/", // Error 403
+	NEW_NUMBER_SEARCH: gc.constants.APP_URI + "/setup/searchnew/", // { "JSON": { "num_matches":"500","translated_query":"","vanity_info":{... obj with phone numbers} }, "HTML": "html page to choose a number"}
 	NEW_NUMBER_VANITY_SEARCH: gc.constants.APP_URI + "/setup/vanitysearchnew/",
-	PORTING: gc.constants.APP_URI + "/porting",
-	PORT_IN: gc.constants.APP_URI + "/porting/portIn",
+	PORTING: gc.constants.APP_URI + "/porting", // a page with all sorts of stuff about porting numbers
+	PORT_IN: gc.constants.APP_URI + "/porting/portIn", POST: 500, GET: 403
 	PORT_OUT_CHECKOUT: gc.constants.APP_URI + "/porting/portOutCheckout",
 	PORT_SUPPLEMENT: gc.constants.APP_URI + "/porting/update",
 	PURCHASE_NUMBER_CHANGE: gc.constants.APP_URI + "/settings/purchasenumberchange",
-	PURCHASE_VANITY_NUMBER: gc.constants.APP_URI + "/setup/purchasevanitynumber",
-	QUICK_ADD: gc.constants.APP_URI + "/phonebook/quickAdd/",
+	PURCHASE_VANITY_NUMBER: gc.constants.APP_URI + "/setup/purchasevanitynumber", // POST: {"ok":false,"error":{"message":"Cannot find function purchaseVanityPhoneNumber in object com.google.grandcentral.clients.billing.BillingClient@51279f9f."...}
+	QUICK_ADD: gc.constants.APP_URI + "/phonebook/quickAdd/", // POST: empty, GET: Error 403
 	RATE_CALL: gc.constants.APP_URI + "/inbox/ratecall/",
 	RATE_TRANSCRIPT: gc.constants.APP_URI + "/inbox/rateTranscript/",
 	RECORD_GREETING: gc.constants.APP_URI + "/call/recordGreeting/",
 	RECORD_NAME: gc.constants.APP_URI + "/call/recordName/",
 	RESERVE_DID: gc.constants.APP_URI + "/setup/reserve",
-	SET_DO_NOT_DISTURB: gc.constants.APP_URI + "/settings/setDoNotDisturb/",
+	SET_DO_NOT_DISTURB: gc.constants.APP_URI + "/settings/setDoNotDisturb/", // POST: {"ok":true} //
 	SET_FORWARDING_ENABLED: gc.constants.APP_URI + "/settings/setForwardingEnabled/",
 	SETUP_CREATE: gc.constants.APP_URI + "/setup/create/",
 	SETUP_CREATE_CLIENT: gc.constants.APP_URI + "/setup/createclientonly/",
@@ -170,5 +169,45 @@ module.exports = {
 	UNRESERVE_DID: gc.constants.APP_URI + "/setup/unreserve",
 	UPGRADE_CLIENT: gc.constants.APP_URI + "/settings/upgradeClient",
 	UPGRADE_LITE: gc.constants.APP_URI + "/settings/upgrade",
-	VERIFY_FORWARDING: gc.constants.APP_URI + "/call/verifyForwarding"
+	VERIFY_FORWARDING: gc.constants.APP_URI + "/call/verifyForwarding" //  {"ok" : false, "error" : "Cannot complete call."}
 */
+
+// what is https://www.google.com/voice/b/1/service/post ??  client posts something?? to it when you change settings in Settings->Calls and receives back [,[1,1,0,0,1,,1,0,0,"0",,"(user)@(email.com)"]]
+
+/* Settings tabs are as follows: -- use "v" number that is apparently stored in gcData? as a GET param
+
+ Return XML with JSON and HTML CDATA sections.
+
+Phones: /settings/tab/phones -- json looks same as getPhoneInfo
+Voicemail: /settings/tab/voicemailsettings -- json looks same as getPhoneInfo
+   when click save, posts to /settings/editGeneralSettings {
+       _rnr_se: ...
+       emailNotificationActive: 1 (or 0?)
+       emailNotificationAddress: user@email.com
+       greeingId: 0
+       missedToEmail: 0
+       showTranscripts: 0 // toggled by the "Transcribe Voicemails" checkbox
+       smsNotifications[+12025551212]: 0
+       smsNotifications[+12025551213]: 0  // account had 2 phones defined
+       smsToEmailActive: 1
+       smsToEmailSubject: 0
+       voicemailFeature1: 1
+   }
+
+Call Settings: /settings/tab/callsettings -- json looks same as getPhoneInfo
+
+ options here all post to /service/post -- we can examine the functions in the Settings pages to see what the params and returns from this are, they are cryptic.
+
+Groups And Circles: /settings/tab/groups -- json looks same as getPhoneInfo
+
+Billing: /settings/tab/billing -- json looks same as getBillingCredit
+
+Account: /settings/tab/settings -- json looks same as getPhoneInfo
+
+ posts to /settings/editGeneralSettings, language/timezone: {
+     _rnr_se: ...
+     language: "en"
+     timezone: "America/New_York" // (for "Eastern Time")
+ }
+
+ */

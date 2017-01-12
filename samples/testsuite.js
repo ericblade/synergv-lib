@@ -13,6 +13,7 @@ const TestPhoneName = 'My Cell'; // Change this to whatever the name of your pho
 const login = require('./login');
 const getBillingCredit = require('..').getBillingCredit;
 const getDoNotDisturb = require('..').getDoNotDisturb;
+const checkMessages = require('..').checkMessages;
 const getBox = require('..').getBox;
 const sendMessage = require('..').sendMessage;
 const deleteForever = require('..').deleteForeverMessage;
@@ -45,10 +46,14 @@ let vmTranscriptText = ''; // filled in during voicemail Transcript testing, sto
 let testPhoneInfo = {}; // filled in from getTestPhoneInfo
 let testCallId = ''; // filled in from callNumber test
 
+function wait(time) {
+    return new Promise(resolve => setTimeout(() => resolve(true), time));
+}
+
 function getTestPhoneInfo() {
     return new Promise((resolve, reject) => {
         console.warn(`**** getPhoneInfo searching for phone called ${TestPhoneName}`);
-        getPhoneInfo()
+        wait(200).then(() => getPhoneInfo())
         .then((phoneData) => {
             const testPhones = phoneData.filter(p => p.name === TestPhoneName);
             if (testPhones.length === 0) {
@@ -118,7 +123,7 @@ function testConversationValue(conv, name, compareValue) {
 function retrieveTestMessageFromBox(box = 'inbox') {
     console.warn(`**** Searching for test messages in box ${box}`);
     return new Promise((resolve, reject) => {
-        getBox({ label: box, p: 1 })
+        wait(200).then(() => getBox({ label: box, p: 1 }))
         .then((conversations) => {
             const results = conversations.filter(c => c.messageText === testMessageText && c.phoneNumber === gcData.number.raw);
             resolve(results);
@@ -131,7 +136,7 @@ function retrieveTestMessageFromBox(box = 'inbox') {
 function retrieveVoiceMailConversation() {
     console.warn('**** Searching for a Voicemail item');
     return new Promise((resolve, reject) => {
-        getBox({ label: 'voicemail', p: 1 })
+        wait(200).then(() => getBox({ label: 'voicemail', p: 1 }))
         .then((conversations) => {
             if (conversations.length === 0) {
                 throw new Error('Unable to proceed with Voicemail tests, no voicemails found.');
@@ -143,7 +148,7 @@ function retrieveVoiceMailConversation() {
 }
 
 function checkTestMessageCount(count, box = 'inbox') {
-    return retrieveTestMessageFromBox(box)
+    return wait(200).then(() => retrieveTestMessageFromBox(box))
         .then((convs) => {
             if (convs.length === count) {
                 console.warn(`**** ${box} test message count is expected ${count}`);
@@ -158,10 +163,6 @@ function header(str) {
     return false;
 }
 
-function wait(time) {
-    return new Promise(resolve => setTimeout(() => resolve(true), time));
-}
-
 console.log('**** Logging in to retrieve tokens');
 
 login.login()
@@ -171,6 +172,9 @@ login.login()
 .then(resp => testResultIsOk(resp, true))
 .then(() => header('getDoNotDisturb') || getDoNotDisturb())
 .then(resp => testResultIsOk(resp, true))
+.then(() => header('checkMessages') || checkMessages())
+.then(resp => testResultIsOk(resp, true))
+.then(() => wait(200))
 
 /*
  * Insert any tests that do NOT require having a conversation to work with ABOVE the following
@@ -220,6 +224,7 @@ login.login()
 .then(() => header('Unarchiving') || archiveMessages([testId], false))
 .then(resp => testResultIsOk(resp))
 .then(() => checkTestMessageCount(1))
+.then(() => wait(200))
 
 .then(() => header('Blocking') || blockMessage([testId], true))
 .then(resp => testResultIsOk(resp))
@@ -229,6 +234,7 @@ login.login()
 .then(resp => testResultIsOk(resp))
 .then(() => checkTestMessageCount(1))
 .then(convs => testConversationValue(convs[0], 'isSpam', false))
+.then(() => wait(200))
 
 .then(() => header('Delete') || deleteMessage([testId], true))
 .then(resp => testResultIsOk(resp))
@@ -238,6 +244,7 @@ login.login()
 .then(resp => testResultIsOk(resp))
 .then(() => checkTestMessageCount(1))
 .then(convs => testConversationValue(convs[0], 'isTrash', false))
+.then(() => wait(200))
 
 .then(() => header('Mark Read') || markRead([testId], true))
 .then(resp => testResultIsOk(resp))
@@ -247,6 +254,7 @@ login.login()
 .then(resp => testResultIsOk(resp))
 .then(() => checkTestMessageCount(1))
 .then(convs => testConversationValue(convs[0], 'isRead', false))
+.then(() => wait(200))
 
 .then(() => header('Star') || starMessage([testId], true))
 .then(resp => testResultIsOk(resp))
@@ -256,6 +264,7 @@ login.login()
 .then(resp => testResultIsOk(resp))
 .then(() => checkTestMessageCount(1))
 .then(convs => testConversationValue(convs[0], 'star', false))
+.then(() => wait(200))
 
 .then(() => header('Save Note') || saveNote(testId, testMessageText))
 .then(resp => testResultIsOk(resp))
@@ -265,6 +274,7 @@ login.login()
 .then(resp => testResultIsOk(resp))
 .then(() => checkTestMessageCount(1))
 .then(convs => testConversationValue(convs[0], 'note', ''))
+.then(() => wait(200))
 
 // how to test searchMessages? probably provide a search query for the test message, and validate that it ONLY has that message.
 // TODO: Now that I'm thinking about it, we should do a searchMessages on that at the very top instead of a Inbox get,
@@ -282,6 +292,7 @@ login.login()
  */
 .then(() => header('Deleting Test Message Forever...') || deleteForever([testId], true))
 .then(() => checkTestMessageCount(0))
+.then(() => wait(200))
 /*
  * Begin Voicemail Tests -- Since we can't send a Voicemail from this code, we have to depend on
  * there being an already existing item in the Voicemail box.
@@ -297,6 +308,7 @@ login.login()
     vmTranscriptText = vmConv.messageText;
     console.warn('**** Voicemail found: ', vmConv);
 })
+.then(() => wait(200))
 
 // TODO: getTranscriptTiming does NOT work, I do not know how to get it to work, and I don't know
 // how to trigger it from the real website. :-S
@@ -313,6 +325,7 @@ login.login()
 .then(resp => testResultIsOk(resp))
 .then(() => retrieveVoiceMailConversation()) // TODO: see above TODO
 .then(vmConv => testConversationValue(vmConv, 'messageText', vmTranscriptText))
+.then(() => wait(200))
 
 /*
  * Test Phone Call Functions -- These require a forwarding phone, and we cannot validate that they

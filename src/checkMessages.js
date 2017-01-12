@@ -19,14 +19,14 @@ const methodUris = require('./uris').methodUris;
 const checkMessages = (tokens = tokenStore.getTokens()) => {
     return new Promise((resolve, reject) => {
         getRequest(
-            `${methodUris.checkMessages}?r=${encodeURIComponent(tokens.r)}`,
+            methodUris.checkMessages,
+            // `${methodUris.checkMessages}?r=${encodeURIComponent(tokens.r)}`, // for the XPC method
             {
                 params: {
-                    r: tokens.r,
                 },
                 options: {
                     tokens,
-                    responseType: 'json',
+                    responseType: '',
                 },
             },
             resp => resolve(resp)
