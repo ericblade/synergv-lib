@@ -26,7 +26,7 @@ const checkMessages = (tokens = tokenStore.getTokens()) => {
                 },
                 options: {
                     tokens,
-                    responseType: '',
+                    responseType: 'json',
                 },
             },
             resp => resolve(resp)
