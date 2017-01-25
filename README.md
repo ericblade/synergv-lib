@@ -1,6 +1,20 @@
 # synergv-lib
 Universal Javascript Google Voice API
 
+This library implements a lot of the functionality of Google Voice, using the known
+API endpoints that were available prior to January 24, 2017.
+
+On January 24, 2017, Google introduced a new Google Voice website, which uses a completely
+different communications API, which appears to be similar to their other public APIs.  However,
+Google is not currently offering a key that will allow regular end developers/users the ability
+to use the Google API with the Google Voice service.  Hopefully that will change in the future.
+
+I do not know if or when Google may turn off the old version of the service -- they usually
+keep things around for at least 18 months, but this is a somewhat different situation than when
+they end of life other products.
+
+Better documentation will be forthcoming.
+
 To use:
 
 npm install --save ericblade/synergv-lib
@@ -33,6 +47,10 @@ Something like "jsdom" could also be used, but I don't see any particularly comp
 move off of xmldom currently, other than the extremely loud output from it while parsing.
 
 samples/testsuite.js contains a nearly complete test of all of the functions.
+
+NOTE: It does appear that once your account has converted to the new Google Voice api,
+that this library is no longer able to use the old API to communicate.  I am looking into
+finding a way around that.
 
 Usage:
 node samples/testsuite.js userid@email.com password
