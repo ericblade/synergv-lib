@@ -1,4 +1,6 @@
 # synergv-lib
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/ericblade/synergv-lib.svg)](https://greenkeeper.io/)
 Universal Javascript Google Voice API
 
 This library implements a lot of the functionality of Google Voice, using the known
