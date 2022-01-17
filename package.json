@@ -33,6 +33,6 @@
     "object.entries": "^1.0.4",
     "object.values": "^1.0.4",
     "request": "^2.79.0",
-    "xmldom": "^0.1.27"
+    "xmldom": "^0.5.0"
   }
 }
